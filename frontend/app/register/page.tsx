@@ -31,23 +31,24 @@ export default function Register() {
             setError(signUpError.message)
             setLoading(false)
         } else {
-            // Supabase auto-confirms if disabled, or sends email.
-            // Assuming auto-confirm or email sent.
             alert('Registration successful! Please sign in.')
             router.push('/login')
         }
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="glass-card max-w-md w-full p-8 space-y-8">
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4">
+            <div className="sketch-card max-w-md w-full p-8 relative">
+                <div className="absolute -top-3 -right-3 bg-black text-white px-2 py-1 text-sm font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)]">
+                    Join Us
+                </div>
                 <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-                        Create your account
+                    <h2 className="mt-2 text-3xl font-black text-black tracking-tight">
+                        Create Account
                     </h2>
-                    <p className="mt-2 text-center text-sm text-gray-400">
-                        Already have an account?{' '}
-                        <Link href="/login" className="font-medium text-blue-400 hover:text-blue-300">
+                    <p className="mt-2 text-sm text-gray-600 font-medium">
+                        Already have one?{' '}
+                        <Link href="/login" className="text-black underline decoration-2 underline-offset-2 hover:bg-black hover:text-white transition-colors">
                             Sign in
                         </Link>
                     </p>
@@ -55,42 +56,42 @@ export default function Register() {
                 <form className="mt-8 space-y-6" onSubmit={handleRegister}>
                     <div className="space-y-4">
                         <div>
-                            <label htmlFor="full-name" className="sr-only">Full Name</label>
+                            <label htmlFor="full-name" className="block text-sm font-bold text-black mb-1">Full Name</label>
                             <input
                                 id="full-name"
                                 name="fullName"
                                 type="text"
                                 required
-                                className="input-field"
-                                placeholder="Full Name"
+                                className="sketch-input"
+                                placeholder="John Doe"
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                             />
                         </div>
                         <div>
-                            <label htmlFor="email-address" className="sr-only">Email address</label>
+                            <label htmlFor="email-address" className="block text-sm font-bold text-black mb-1">Email address</label>
                             <input
                                 id="email-address"
                                 name="email"
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="input-field"
-                                placeholder="Email address"
+                                className="sketch-input"
+                                placeholder="name@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
                         <div>
-                            <label htmlFor="password" className="sr-only">Password</label>
+                            <label htmlFor="password" className="block text-sm font-bold text-black mb-1">Password</label>
                             <input
                                 id="password"
                                 name="password"
                                 type="password"
                                 autoComplete="new-password"
                                 required
-                                className="input-field"
-                                placeholder="Password"
+                                className="sketch-input"
+                                placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
@@ -98,8 +99,8 @@ export default function Register() {
                     </div>
 
                     {error && (
-                        <div className="text-red-400 text-sm text-center bg-red-900/20 p-2 rounded">
-                            {error}
+                        <div className="bg-red-50 text-red-600 border-2 border-red-500 p-2 text-sm font-bold">
+                            Error: {error}
                         </div>
                     )}
 
@@ -107,9 +108,9 @@ export default function Register() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`w-full sketch-btn-primary ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            {loading ? 'Creating account...' : 'Sign up'}
+                            {loading ? 'Creating...' : 'Create Account ->'}
                         </button>
                     </div>
                 </form>
