@@ -60,7 +60,7 @@ export default function Register() {
                                 Full Name
                             </label>
                             <div className="relative">
-                                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
+                                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] z-10 pointer-events-none" />
                                 <input
                                     id="fullName"
                                     name="fullName"
@@ -79,7 +79,7 @@ export default function Register() {
                                 Email
                             </label>
                             <div className="relative">
-                                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
+                                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] z-10 pointer-events-none" />
                                 <input
                                     id="email"
                                     name="email"
@@ -99,7 +99,7 @@ export default function Register() {
                                 Password
                             </label>
                             <div className="relative">
-                                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
+                                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] z-10 pointer-events-none" />
                                 <input
                                     id="password"
                                     name="password"
