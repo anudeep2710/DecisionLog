@@ -1,5 +1,5 @@
 "use client"
-import { Check, X, HelpCircle, Clock, Edit2, Trash2 } from 'lucide-react'
+import { Check, X, HelpCircle, Edit2, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface Decision {
@@ -13,17 +13,6 @@ interface Decision {
     created_at: string
 }
 
-const outcomeIcons = {
-    success: <Check className="text-black" size={20} strokeWidth={3} />,
-    failure: <X className="text-black" size={20} strokeWidth={3} />,
-    unknown: <HelpCircle className="text-gray-400" size={20} />,
-}
-
-const statusStyles = {
-    pending: 'bg-white text-black border-dashed border-gray-400',
-    reviewed: 'bg-black text-white border-black',
-}
-
 interface Props {
     decision: Decision
     onDelete: (id: string) => void
@@ -32,68 +21,69 @@ interface Props {
 export default function DecisionCard({ decision, onDelete }: Props) {
     const router = useRouter()
 
+    const outcomeConfig = {
+        success: { bg: 'bg-green-50', text: 'text-green-700', icon: <Check size={12} /> },
+        failure: { bg: 'bg-red-50', text: 'text-red-700', icon: <X size={12} /> },
+        unknown: { bg: 'bg-gray-100', text: 'text-gray-500', icon: <HelpCircle size={12} /> }
+    }
+
+    const outcome = outcomeConfig[decision.outcome]
+
     return (
-        <div className="sketch-card p-6 relative group">
-            <div className="flex justify-between items-start">
-                <div>
-                    <div className="flex items-center gap-3 mb-3">
-                        <span className={`text-xs font-bold px-2 py-0.5 border-2 ${statusStyles[decision.status] || 'border-black'}`}>
-                            {decision.status.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-gray-500 font-mono flex items-center gap-1">
-                            {new Date(decision.created_at).toLocaleDateString()}
-                        </span>
-                    </div>
-                    <h3 className="text-xl font-black text-black mb-2 tracking-tight">{decision.title}</h3>
+        <div className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-shadow h-full flex flex-col">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                    <span className={`text-xs font-medium px-2 py-1 rounded-md ${decision.status === 'pending'
+                            ? 'bg-amber-50 text-amber-700'
+                            : 'bg-gray-900 text-white'
+                        }`}>
+                        {decision.status}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                        {new Date(decision.created_at).toLocaleDateString()}
+                    </span>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                         onClick={() => router.push(`/dashboard/decisions/${decision.id}`)}
-                        className="p-1.5 hover:bg-gray-100 border border-transparent hover:border-black rounded-sm transition-all" title="Edit">
-                        <Edit2 size={16} />
+                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                        <Edit2 size={14} />
                     </button>
                     <button
                         onClick={() => onDelete(decision.id)}
-                        className="p-1.5 hover:bg-gray-100 border border-transparent hover:border-black rounded-sm text-red-600" title="Delete">
-                        <Trash2 size={16} />
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                        <Trash2 size={14} />
                     </button>
                 </div>
             </div>
 
-            <p className="text-gray-700 text-sm mb-5 font-medium leading-relaxed border-l-2 border-gray-200 pl-3">
+            {/* Title */}
+            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{decision.title}</h3>
+
+            {/* Context */}
+            <p className="text-gray-500 text-sm mb-4 line-clamp-2 flex-grow">
                 {decision.context || "No context provided."}
             </p>
 
-            <div className="flex items-center justify-between pt-4 mt-2 border-t-2 border-gray-100">
-                <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Outcome</span>
-                    <div className={`flex items-center gap-1 px-2 py-0.5 border ${decision.outcome === 'unknown' ? 'border-gray-300 text-gray-400' : 'border-black bg-gray-50'}`}>
-                        {outcomeIcons[decision.outcome]}
-                        <span className={`uppercase text-xs font-bold ${decision.outcome === 'unknown' ? 'text-gray-400' : 'text-black'}`}>
-                            {decision.outcome}
-                        </span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Confidence</span>
-                    <div className="flex gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                            <div
-                                key={i}
-                                className={`w-2 h-4 border border-black ${i < decision.confidence_level ? 'bg-black' : 'bg-transparent'
-                                    }`}
-                            />
-                        ))}
-                    </div>
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md ${outcome.bg} ${outcome.text}`}>
+                    {outcome.icon}
+                    {decision.outcome}
+                </span>
+                <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                        <div
+                            key={i}
+                            className={`w-1.5 h-3 rounded-sm ${i < decision.confidence_level ? 'bg-gray-900' : 'bg-gray-200'
+                                }`}
+                        />
+                    ))}
                 </div>
             </div>
-
-            {decision.choice_made && (
-                <div className="mt-5 bg-yellow-50 p-3 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                    <p className="text-xs font-bold text-black uppercase mb-1">Decision</p>
-                    <p className="text-sm font-medium text-black">{decision.choice_made}</p>
-                </div>
-            )}
         </div>
     )
 }

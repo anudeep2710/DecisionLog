@@ -31,70 +31,81 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4">
-            <div className="sketch-card max-w-md w-full p-8 relative">
-                <div className="absolute -top-3 -left-3 bg-black text-white px-2 py-1 text-sm font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)]">
-                    Members Only
-                </div>
-                <div>
-                    <h2 className="mt-2 text-3xl font-black text-black tracking-tight">
-                        Welcome Back
-                    </h2>
-                    <p className="mt-2 text-sm text-gray-600 font-medium">
-                        New here?{' '}
-                        <Link href="/register" className="text-black underline decoration-2 underline-offset-2 hover:bg-black hover:text-white transition-colors">
-                            Create an account
-                        </Link>
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12">
+            <div className="w-full max-w-sm">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                        Welcome back
+                    </h1>
+                    <p className="text-gray-500">
+                        Sign in to continue to DecisionLog
                     </p>
                 </div>
-                <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-                    <div className="space-y-4">
+
+                {/* Card */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                    <form onSubmit={handleLogin} className="space-y-5">
                         <div>
-                            <label htmlFor="email-address" className="block text-sm font-bold text-black mb-1">Email address</label>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                Email
+                            </label>
                             <input
-                                id="email-address"
+                                id="email"
                                 name="email"
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="sketch-input"
-                                placeholder="name@example.com"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-colors"
+                                placeholder="you@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
+
                         <div>
-                            <label htmlFor="password" className="block text-sm font-bold text-black mb-1">Password</label>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                Password
+                            </label>
                             <input
                                 id="password"
                                 name="password"
                                 type="password"
                                 autoComplete="current-password"
                                 required
-                                className="sketch-input"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-colors"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-                    </div>
 
-                    {error && (
-                        <div className="bg-red-50 text-red-600 border-2 border-red-500 p-2 text-sm font-bold">
-                            Error: {error}
-                        </div>
-                    )}
+                        {/* Error Message */}
+                        {error && (
+                            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-xl">
+                                {error}
+                            </div>
+                        )}
 
-                    <div>
+                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`w-full sketch-btn-primary ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`w-full bg-black text-white font-semibold py-3 px-4 rounded-xl hover:bg-gray-800 transition-colors ${loading ? 'opacity-60 cursor-not-allowed' : ''
+                                }`}
                         >
-                            {loading ? 'Signing in...' : 'Sign In ->'}
+                            {loading ? 'Signing in...' : 'Sign in'}
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
+
+                {/* Footer Link */}
+                <p className="text-center text-gray-500 text-sm mt-6">
+                    Don't have an account?{' '}
+                    <Link href="/register" className="text-black font-medium hover:underline">
+                        Create one
+                    </Link>
+                </p>
             </div>
         </div>
     )

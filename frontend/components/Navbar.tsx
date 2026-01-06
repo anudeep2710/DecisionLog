@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
-import { LogOut, Menu, X, BookOpen } from 'lucide-react'
+import { LogOut, Menu, X } from 'lucide-react'
 
 export default function Navbar() {
     const [user, setUser] = useState<any>(null)
@@ -30,53 +30,102 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="bg-white/80 backdrop-blur-sm border-b-2 border-black sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6">
                 <div className="flex items-center justify-between h-16">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-black text-white p-1.5 border border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)]">
-                            <BookOpen size={20} />
+                    {/* Brand */}
+                    <Link href="/" className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">DL</span>
                         </div>
-                        <Link href="/" className="text-xl font-bold text-black tracking-tight">
+                        <span className="text-lg font-semibold text-gray-900">
                             DecisionLog
-                        </Link>
-                    </div>
-                    <div className="hidden md:block">
-                        <div className="ml-10 flex items-baseline space-x-4">
-                            {user ? (
-                                <>
-                                    <Link href="/dashboard" className="text-gray-600 hover:text-black hover:underline decoration-2 underline-offset-4 px-3 py-2 text-sm font-bold transition-all">Dashboard</Link>
-                                    <button onClick={handleLogout} className="text-gray-600 hover:text-red-600 px-3 py-2 text-sm font-bold flex items-center gap-2 transition-colors">
-                                        <LogOut size={16} /> Logout
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <Link href="/login" className="text-black font-medium hover:underline decoration-2 underline-offset-4 px-3 py-2">Login</Link>
-                                    <Link href="/register" className="sketch-btn-primary text-sm">Get Started</Link>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                    <div className="-mr-2 flex md:hidden">
-                        <button onClick={() => setIsOpen(!isOpen)} className="text-black p-2 hover:bg-gray-100 border-2 border-transparent hover:border-black transition-all">
-                            {isOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button>
-                    </div>
-                </div>
-            </div>
-            {isOpen && (
-                <div className="md:hidden bg-white border-b-2 border-black">
-                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                        </span>
+                    </Link>
+
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center gap-2">
                         {user ? (
                             <>
-                                <Link href="/dashboard" className="text-black block px-3 py-2 font-bold hover:bg-gray-50">Dashboard</Link>
-                                <button onClick={handleLogout} className="text-red-600 block w-full text-left px-3 py-2 font-bold hover:bg-gray-50">Logout</button>
+                                <Link
+                                    href="/dashboard"
+                                    className="text-gray-600 hover:text-gray-900 font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    Dashboard
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 text-gray-600 hover:text-red-600 font-medium px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+                                >
+                                    <LogOut size={16} />
+                                    Logout
+                                </button>
                             </>
                         ) : (
                             <>
-                                <Link href="/login" className="text-black block px-3 py-2 font-bold hover:bg-gray-50">Login</Link>
-                                <Link href="/register" className="text-black block px-3 py-2 font-bold hover:bg-gray-50">Register</Link>
+                                <Link
+                                    href="/login"
+                                    className="text-gray-600 hover:text-gray-900 font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    Sign In
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    className="bg-black text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
+                                >
+                                    Get Started
+                                </Link>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Mobile Menu Button */}
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        aria-label="Toggle menu"
+                    >
+                        {isOpen ? <X size={22} /> : <Menu size={22} />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Menu */}
+            {isOpen && (
+                <div className="md:hidden bg-white border-t border-gray-100">
+                    <div className="px-4 py-4 space-y-1">
+                        {user ? (
+                            <>
+                                <Link
+                                    href="/dashboard"
+                                    className="block py-3 px-4 font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    Dashboard
+                                </Link>
+                                <button
+                                    onClick={() => { handleLogout(); setIsOpen(false); }}
+                                    className="block w-full text-left py-3 px-4 font-medium text-red-600 hover:bg-red-50 rounded-lg"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="block py-3 px-4 font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    Sign In
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    className="block py-3 px-4 font-semibold text-center bg-black text-white rounded-lg"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    Get Started
+                                </Link>
                             </>
                         )}
                     </div>

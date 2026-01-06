@@ -31,89 +31,99 @@ export default function Register() {
             setError(signUpError.message)
             setLoading(false)
         } else {
-            alert('Registration successful! Please sign in.')
             router.push('/login')
         }
     }
 
     return (
-        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4">
-            <div className="sketch-card max-w-md w-full p-8 relative">
-                <div className="absolute -top-3 -right-3 bg-black text-white px-2 py-1 text-sm font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)]">
-                    Join Us
-                </div>
-                <div>
-                    <h2 className="mt-2 text-3xl font-black text-black tracking-tight">
-                        Create Account
-                    </h2>
-                    <p className="mt-2 text-sm text-gray-600 font-medium">
-                        Already have one?{' '}
-                        <Link href="/login" className="text-black underline decoration-2 underline-offset-2 hover:bg-black hover:text-white transition-colors">
-                            Sign in
-                        </Link>
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12">
+            <div className="w-full max-w-sm">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                        Create your account
+                    </h1>
+                    <p className="text-gray-500">
+                        Start tracking your decisions today
                     </p>
                 </div>
-                <form className="mt-8 space-y-6" onSubmit={handleRegister}>
-                    <div className="space-y-4">
+
+                {/* Card */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                    <form onSubmit={handleRegister} className="space-y-5">
                         <div>
-                            <label htmlFor="full-name" className="block text-sm font-bold text-black mb-1">Full Name</label>
+                            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+                                Full Name
+                            </label>
                             <input
-                                id="full-name"
+                                id="fullName"
                                 name="fullName"
                                 type="text"
                                 required
-                                className="sketch-input"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-colors"
                                 placeholder="John Doe"
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                             />
                         </div>
+
                         <div>
-                            <label htmlFor="email-address" className="block text-sm font-bold text-black mb-1">Email address</label>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                Email
+                            </label>
                             <input
-                                id="email-address"
+                                id="email"
                                 name="email"
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="sketch-input"
-                                placeholder="name@example.com"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-colors"
+                                placeholder="you@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
+
                         <div>
-                            <label htmlFor="password" className="block text-sm font-bold text-black mb-1">Password</label>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                Password
+                            </label>
                             <input
                                 id="password"
                                 name="password"
                                 type="password"
                                 autoComplete="new-password"
                                 required
-                                className="sketch-input"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-colors"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-                    </div>
 
-                    {error && (
-                        <div className="bg-red-50 text-red-600 border-2 border-red-500 p-2 text-sm font-bold">
-                            Error: {error}
-                        </div>
-                    )}
+                        {error && (
+                            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-xl">
+                                {error}
+                            </div>
+                        )}
 
-                    <div>
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`w-full sketch-btn-primary ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`w-full bg-black text-white font-semibold py-3 px-4 rounded-xl hover:bg-gray-800 transition-colors ${loading ? 'opacity-60 cursor-not-allowed' : ''
+                                }`}
                         >
-                            {loading ? 'Creating...' : 'Create Account ->'}
+                            {loading ? 'Creating account...' : 'Create account'}
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
+
+                <p className="text-center text-gray-500 text-sm mt-6">
+                    Already have an account?{' '}
+                    <Link href="/login" className="text-black font-medium hover:underline">
+                        Sign in
+                    </Link>
+                </p>
             </div>
         </div>
     )

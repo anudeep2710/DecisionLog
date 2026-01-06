@@ -46,18 +46,13 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
         try {
             const { data: { session } } = await supabase.auth.getSession()
             if (!session) {
-                alert("You must be logged in")
+                alert("Please log in")
                 return
             }
 
-            const url = isEditing
-                ? `${backendUrl}/decisions/${formData.id}`
-                : `${backendUrl}/decisions/`
-
-            const method = isEditing ? 'PUT' : 'POST'
-
+            const url = isEditing ? `${backendUrl}/decisions/${formData.id}` : `${backendUrl}/decisions/`
             const res = await fetch(url, {
-                method: method,
+                method: isEditing ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session.access_token}`
@@ -73,7 +68,6 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
                 alert(`Error: ${err.detail}`)
             }
         } catch (error) {
-            console.error("Submission error", error)
             alert("Something went wrong")
         } finally {
             setLoading(false)
@@ -81,51 +75,53 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
     }
 
     return (
-        <form onSubmit={handleSubmit} className="sketch-card p-6 md:p-8 space-y-6 max-w-2xl mx-auto">
-            <div className="border-b-2 border-dashed border-gray-300 pb-4 mb-4">
-                <h2 className="text-2xl font-black text-black">{isEditing ? 'Edit Decision Log' : 'Log New Decision'}</h2>
-                <p className="text-gray-500 font-medium">Capture the context and your thought process.</p>
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 p-8 space-y-6">
+            <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                    {isEditing ? 'Edit Decision' : 'Log a Decision'}
+                </h2>
+                <p className="text-gray-500 mt-1">Record your thought process</p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
                 <div>
-                    <label className="block text-sm font-bold text-black mb-1 uppercase tracking-wide">Decision Title</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
                     <input
                         name="title"
                         required
                         value={formData.title}
                         onChange={handleChange}
-                        className="sketch-input"
-                        placeholder="e.g. Choosing a Frontend Framework"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400"
+                        placeholder="What decision did you make?"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-bold text-black mb-1 uppercase tracking-wide">Context / Why?</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Context</label>
                     <textarea
                         name="context"
-                        rows={4}
+                        rows={3}
                         value={formData.context}
                         onChange={handleChange}
-                        className="sketch-input"
-                        placeholder="What problem are you solving? What are the constraints?"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 resize-none"
+                        placeholder="What problem were you solving?"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-bold text-black mb-1 uppercase tracking-wide">The Choice Made</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Choice Made</label>
                     <input
                         name="choice_made"
                         value={formData.choice_made}
                         onChange={handleChange}
-                        className="sketch-input"
-                        placeholder="e.g. Selected Next.js over React SPA"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400"
+                        placeholder="What did you decide?"
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-bold text-black mb-1 uppercase tracking-wide">Confidence (1-5)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Confidence (1-5)</label>
                         <input
                             name="confidence_level"
                             type="number"
@@ -133,67 +129,67 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
                             max="5"
                             value={formData.confidence_level}
                             onChange={handleChange}
-                            className="sketch-input"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5"
                         />
                     </div>
-
                     <div>
-                        <label className="block text-sm font-bold text-black mb-1 uppercase tracking-wide">Status</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                         <select
                             name="status"
                             value={formData.status}
                             onChange={handleChange}
-                            className="sketch-input"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none bg-white"
                         >
-                            <option value="pending">Pending Review</option>
+                            <option value="pending">Pending</option>
                             <option value="reviewed">Reviewed</option>
                         </select>
                     </div>
                 </div>
 
                 {isEditing && (
-                    <div className="bg-gray-50 p-4 border-2 border-gray-200">
-                        <label className="block text-sm font-bold text-black mb-1 uppercase tracking-wide">Outcome</label>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Outcome</label>
                         <select
                             name="outcome"
                             value={formData.outcome}
                             onChange={handleChange}
-                            className="sketch-input"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none bg-white"
                         >
-                            <option value="unknown">Unknown (Too early)</option>
+                            <option value="unknown">Unknown</option>
                             <option value="success">Success</option>
-                            <option value="failure">Failure / Learning</option>
+                            <option value="failure">Failure</option>
                         </select>
                     </div>
                 )}
 
                 <div>
-                    <label className="block text-sm font-bold text-black mb-1 uppercase tracking-wide">Notes / Reflection</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
                     <textarea
                         name="notes"
-                        rows={3}
+                        rows={2}
                         value={formData.notes}
                         onChange={handleChange}
-                        className="sketch-input"
-                        placeholder="Any retrospective thoughts?"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 resize-none"
+                        placeholder="Any reflections?"
                     />
                 </div>
             </div>
 
-            <div className="pt-4 flex items-center justify-end gap-4">
+            <div className="flex gap-3 justify-end pt-4">
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="sketch-btn-secondary"
+                    className="px-5 py-2.5 rounded-xl text-gray-600 font-medium hover:bg-gray-100 transition-colors"
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
                     disabled={loading}
-                    className={`sketch-btn-primary ${loading ? 'opacity-50' : ''}`}
+                    className={`px-5 py-2.5 rounded-xl bg-black text-white font-semibold hover:bg-gray-800 transition-colors ${loading ? 'opacity-60 cursor-not-allowed' : ''
+                        }`}
                 >
-                    {loading ? 'Saving...' : 'Save Decision Log'}
+                    {loading ? 'Saving...' : 'Save'}
                 </button>
             </div>
         </form>
