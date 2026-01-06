@@ -3,11 +3,12 @@ import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import DecisionCard from '@/components/DecisionCard'
+import TeamSpaces from '@/components/TeamSpaces'
 import Link from 'next/link'
 import {
     Plus, Search, Filter, ArrowUpDown, Download,
     BarChart2, CheckCircle, XCircle, Clock,
-    Calendar, TrendingUp, FileDown, FileJson
+    Calendar, TrendingUp, FileDown, FileJson, Users
 } from 'lucide-react'
 
 interface Decision {
@@ -19,6 +20,7 @@ interface Decision {
     status: 'pending' | 'reviewed'
     outcome: 'success' | 'failure' | 'unknown'
     created_at: string
+    team_id?: string
 }
 
 type SortOption = 'newest' | 'oldest' | 'confidence' | 'outcome'
@@ -38,6 +40,7 @@ export default function Dashboard() {
     const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
     const [showFilters, setShowFilters] = useState(false)
     const [showExport, setShowExport] = useState(false)
+    const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
 
     const backendUrl = "http://localhost:8000"
 
@@ -72,9 +75,12 @@ export default function Dashboard() {
         return () => window.removeEventListener('keydown', handleKeyDown)
     }, [router])
 
-    const fetchDecisions = async (token: string) => {
+    const fetchDecisions = async (token: string, teamId?: string | null) => {
         try {
-            const res = await fetch(`${backendUrl}/decisions/`, {
+            const url = teamId
+                ? `${backendUrl}/decisions/?team_id=${teamId}`
+                : `${backendUrl}/decisions/`
+            const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
@@ -84,6 +90,16 @@ export default function Dashboard() {
             console.error("Failed to fetch decisions", error)
         } finally {
             setLoading(false)
+        }
+    }
+
+    // Refetch when team changes
+    const handleTeamSelect = async (teamId: string | null) => {
+        setSelectedTeamId(teamId)
+        setLoading(true)
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+            fetchDecisions(session.access_token, teamId)
         }
     }
 
@@ -228,6 +244,9 @@ export default function Dashboard() {
                     </Link>
                 </div>
 
+                {/* Team Spaces */}
+                <TeamSpaces onTeamSelect={handleTeamSelect} selectedTeamId={selectedTeamId} />
+
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div className="notion-card p-4">
@@ -366,8 +385,8 @@ export default function Dashboard() {
                                     key={o}
                                     onClick={() => setFilterOutcome(o as FilterOutcome)}
                                     className={`px-3 py-1 rounded-md text-sm capitalize transition-colors ${filterOutcome === o
-                                            ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
-                                            : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                                        ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
+                                        : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                                         }`}
                                 >
                                     {o}
@@ -381,8 +400,8 @@ export default function Dashboard() {
                                     key={s}
                                     onClick={() => setFilterStatus(s as FilterStatus)}
                                     className={`px-3 py-1 rounded-md text-sm capitalize transition-colors ${filterStatus === s
-                                            ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
-                                            : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                                        ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
+                                        : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                                         }`}
                                 >
                                     {s}

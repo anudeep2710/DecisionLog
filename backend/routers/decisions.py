@@ -17,6 +17,7 @@ class DecisionBase(BaseModel):
     status: Optional[str] = "pending" # pending, reviewed
     outcome: Optional[str] = "unknown" # success, failure, unknown
     notes: Optional[str] = None
+    team_id: Optional[str] = None  # null for personal, uuid for team
 
 class DecisionCreate(DecisionBase):
     pass
@@ -27,6 +28,7 @@ class DecisionUpdate(DecisionBase):
 class DecisionResponse(DecisionBase):
     id: str
     user_id: str
+    team_id: Optional[str] = None
     created_at: str
     updated_at: str
 
@@ -35,10 +37,21 @@ class DecisionResponse(DecisionBase):
 
 # Routes
 @router.get("/", response_model=List[DecisionResponse])
-def get_decisions(user = Depends(get_current_user)):
+def get_decisions(team_id: Optional[str] = None, user = Depends(get_current_user)):
+    """Get decisions - personal or filtered by team"""
     try:
-        response = supabase.table("decisions").select("*").eq("user_id", user.id).order("created_at", desc=True).execute()
+        if team_id:
+            # Get team decisions (must be a member)
+            membership = supabase.table("team_members").select("role").eq("team_id", team_id).eq("user_id", user.id).execute()
+            if not membership.data:
+                raise HTTPException(status_code=403, detail="Not a member of this team")
+            response = supabase.table("decisions").select("*").eq("team_id", team_id).order("created_at", desc=True).execute()
+        else:
+            # Get only personal decisions (no team)
+            response = supabase.table("decisions").select("*").eq("user_id", user.id).is_("team_id", "null").order("created_at", desc=True).execute()
         return response.data
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
