@@ -47,8 +47,8 @@ def get_decisions(team_id: Optional[str] = None, user = Depends(get_current_user
                 raise HTTPException(status_code=403, detail="Not a member of this team")
             response = supabase.table("decisions").select("*").eq("team_id", team_id).order("created_at", desc=True).execute()
         else:
-            # Get only personal decisions (no team)
-            response = supabase.table("decisions").select("*").eq("user_id", user.id).is_("team_id", "null").order("created_at", desc=True).execute()
+            # Get all user's decisions (both personal and team - backwards compatible)
+            response = supabase.table("decisions").select("*").eq("user_id", user.id).order("created_at", desc=True).execute()
         return response.data
     except HTTPException:
         raise
