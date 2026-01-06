@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { ArrowLeft, Check } from 'lucide-react'
 
 interface Decision {
     id?: string
@@ -75,123 +76,180 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
     }
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 p-8 space-y-6">
-            <div>
-                <h2 className="text-xl font-bold text-gray-900">
-                    {isEditing ? 'Edit Decision' : 'Log a Decision'}
-                </h2>
-                <p className="text-gray-500 mt-1">Record your thought process</p>
-            </div>
+        <div className="max-w-2xl mx-auto">
+            {/* Back button */}
+            <button
+                onClick={() => router.back()}
+                className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] mb-6 transition-colors"
+            >
+                <ArrowLeft size={16} />
+                Back to Dashboard
+            </button>
 
-            <div className="space-y-5">
+            <form onSubmit={handleSubmit} className="notion-card p-6 space-y-6">
+                {/* Header */}
+                <div className="pb-4 border-b border-[var(--border-default)]">
+                    <h2 className="text-xl font-bold text-[var(--text-primary)]">
+                        {isEditing ? 'Edit Decision' : 'Log a Decision'}
+                    </h2>
+                    <p className="text-[var(--text-secondary)] text-sm mt-1">
+                        Record your thought process for future reflection
+                    </p>
+                </div>
+
+                {/* Title */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+                        Title <span className="text-[var(--accent-red)]">*</span>
+                    </label>
                     <input
                         name="title"
                         required
                         value={formData.title}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400"
+                        className="w-full px-3 py-2 rounded-md text-sm"
                         placeholder="What decision did you make?"
                     />
                 </div>
 
+                {/* Context */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Context</label>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+                        Context
+                    </label>
                     <textarea
                         name="context"
                         rows={3}
                         value={formData.context}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 resize-none"
-                        placeholder="What problem were you solving?"
+                        className="w-full px-3 py-2 rounded-md text-sm resize-none"
+                        placeholder="What problem were you solving? What constraints did you have?"
                     />
                 </div>
 
+                {/* Choice Made */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Choice Made</label>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+                        Choice Made
+                    </label>
                     <input
                         name="choice_made"
                         value={formData.choice_made}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400"
-                        placeholder="What did you decide?"
+                        className="w-full px-3 py-2 rounded-md text-sm"
+                        placeholder="What did you decide to do?"
                     />
                 </div>
 
+                {/* Confidence & Status Row */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Confidence (1-5)</label>
-                        <input
-                            name="confidence_level"
-                            type="number"
-                            min="1"
-                            max="5"
-                            value={formData.confidence_level}
-                            onChange={handleChange}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5"
-                        />
+                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+                            Confidence (1-5)
+                        </label>
+                        <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((level) => (
+                                <button
+                                    key={level}
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, confidence_level: level }))}
+                                    className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${formData.confidence_level >= level
+                                            ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
+                                            : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                                        }`}
+                                >
+                                    {level}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+                            Status
+                        </label>
                         <select
                             name="status"
                             value={formData.status}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none bg-white"
+                            className="w-full px-3 py-2 rounded-md text-sm"
                         >
-                            <option value="pending">Pending</option>
+                            <option value="pending">Pending Review</option>
                             <option value="reviewed">Reviewed</option>
                         </select>
                     </div>
                 </div>
 
+                {/* Outcome (only in edit mode) */}
                 {isEditing && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Outcome</label>
-                        <select
-                            name="outcome"
-                            value={formData.outcome}
-                            onChange={handleChange}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none bg-white"
-                        >
-                            <option value="unknown">Unknown</option>
-                            <option value="success">Success</option>
-                            <option value="failure">Failure</option>
-                        </select>
+                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+                            Outcome
+                        </label>
+                        <div className="flex gap-2">
+                            {[
+                                { value: 'unknown', label: 'Unknown', color: 'var(--bg-tertiary)' },
+                                { value: 'success', label: 'Success', color: 'var(--accent-green)' },
+                                { value: 'failure', label: 'Learning', color: 'var(--accent-red)' }
+                            ].map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, outcome: opt.value as any }))}
+                                    className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${formData.outcome === opt.value
+                                            ? `bg-[${opt.color}]/20 text-[${opt.color}]`
+                                            : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                                        }`}
+                                    style={{
+                                        backgroundColor: formData.outcome === opt.value ? `color-mix(in srgb, ${opt.color} 15%, transparent)` : undefined,
+                                        color: formData.outcome === opt.value ? opt.color : undefined
+                                    }}
+                                >
+                                    {formData.outcome === opt.value && <Check size={14} />}
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 )}
 
+                {/* Notes */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+                        Notes & Reflections
+                    </label>
                     <textarea
                         name="notes"
-                        rows={2}
+                        rows={3}
                         value={formData.notes}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 resize-none"
-                        placeholder="Any reflections?"
+                        className="w-full px-3 py-2 rounded-md text-sm resize-none"
+                        placeholder="Any additional thoughts or learnings?"
                     />
                 </div>
-            </div>
 
-            <div className="flex gap-3 justify-end pt-4">
-                <button
-                    type="button"
-                    onClick={() => router.back()}
-                    className="px-5 py-2.5 rounded-xl text-gray-600 font-medium hover:bg-gray-100 transition-colors"
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className={`px-5 py-2.5 rounded-xl bg-black text-white font-semibold hover:bg-gray-800 transition-colors ${loading ? 'opacity-60 cursor-not-allowed' : ''
-                        }`}
-                >
-                    {loading ? 'Saving...' : 'Save'}
-                </button>
-            </div>
-        </form>
+                {/* Actions */}
+                <div className="flex gap-3 justify-end pt-4 border-t border-[var(--border-default)]">
+                    <button
+                        type="button"
+                        onClick={() => router.back()}
+                        className="btn-secondary text-sm"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={`btn-primary text-sm inline-flex items-center gap-2 ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    >
+                        {loading ? 'Saving...' : (
+                            <>
+                                <Check size={16} />
+                                {isEditing ? 'Save Changes' : 'Save Decision'}
+                            </>
+                        )}
+                    </button>
+                </div>
+            </form>
+        </div>
     )
 }

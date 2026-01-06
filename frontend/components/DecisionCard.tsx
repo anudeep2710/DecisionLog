@@ -1,6 +1,7 @@
 "use client"
-import { Check, X, HelpCircle, Edit2, Trash2 } from 'lucide-react'
+import { Check, X, HelpCircle, Edit2, Trash2, MoreHorizontal } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 interface Decision {
     id: string
@@ -20,65 +21,119 @@ interface Props {
 
 export default function DecisionCard({ decision, onDelete }: Props) {
     const router = useRouter()
+    const [showActions, setShowActions] = useState(false)
 
     const outcomeConfig = {
-        success: { bg: 'bg-green-50', text: 'text-green-700', icon: <Check size={12} /> },
-        failure: { bg: 'bg-red-50', text: 'text-red-700', icon: <X size={12} /> },
-        unknown: { bg: 'bg-gray-100', text: 'text-gray-500', icon: <HelpCircle size={12} /> }
+        success: {
+            bg: 'bg-[var(--accent-green)]/10',
+            text: 'text-[var(--accent-green)]',
+            icon: <Check size={12} />,
+            label: 'Success'
+        },
+        failure: {
+            bg: 'bg-[var(--accent-red)]/10',
+            text: 'text-[var(--accent-red)]',
+            icon: <X size={12} />,
+            label: 'Learning'
+        },
+        unknown: {
+            bg: 'bg-[var(--bg-tertiary)]',
+            text: 'text-[var(--text-tertiary)]',
+            icon: <HelpCircle size={12} />,
+            label: 'Unknown'
+        }
     }
 
     const outcome = outcomeConfig[decision.outcome]
 
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr)
+        const now = new Date()
+        const diffMs = now.getTime() - date.getTime()
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+        if (diffDays === 0) return 'Today'
+        if (diffDays === 1) return 'Yesterday'
+        if (diffDays < 7) return `${diffDays} days ago`
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    }
+
     return (
-        <div className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-shadow h-full flex flex-col">
+        <div
+            className="notion-card p-4 group cursor-pointer hover:shadow-md transition-all duration-200"
+            onClick={() => router.push(`/dashboard/decisions/${decision.id}`)}
+        >
             {/* Header */}
             <div className="flex items-start justify-between gap-2 mb-3">
-                <div className="flex items-center gap-2">
-                    <span className={`text-xs font-medium px-2 py-1 rounded-md ${decision.status === 'pending'
-                            ? 'bg-amber-50 text-amber-700'
-                            : 'bg-gray-900 text-white'
+                <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full uppercase tracking-wide ${decision.status === 'pending'
+                            ? 'bg-[var(--accent-yellow)]/15 text-[var(--accent-yellow)]'
+                            : 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
                         }`}>
                         {decision.status}
                     </span>
-                    <span className="text-xs text-gray-400">
-                        {new Date(decision.created_at).toLocaleDateString()}
+                    <span className="text-xs text-[var(--text-tertiary)]">
+                        {formatDate(decision.created_at)}
                     </span>
                 </div>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                {/* Actions */}
+                <div className="relative">
                     <button
-                        onClick={() => router.push(`/dashboard/decisions/${decision.id}`)}
-                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        onClick={(e) => { e.stopPropagation(); setShowActions(!showActions) }}
+                        className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-tertiary)] opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                        <Edit2 size={14} />
+                        <MoreHorizontal size={16} />
                     </button>
-                    <button
-                        onClick={() => onDelete(decision.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                        <Trash2 size={14} />
-                    </button>
+                    {showActions && (
+                        <div
+                            className="absolute right-0 top-full mt-1 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg shadow-lg py-1 z-10 min-w-[120px]"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button
+                                onClick={() => router.push(`/dashboard/decisions/${decision.id}`)}
+                                className="w-full px-3 py-1.5 text-sm text-left text-[var(--text-primary)] hover:bg-[var(--bg-hover)] flex items-center gap-2"
+                            >
+                                <Edit2 size={14} />
+                                Edit
+                            </button>
+                            <button
+                                onClick={() => onDelete(decision.id)}
+                                className="w-full px-3 py-1.5 text-sm text-left text-[var(--accent-red)] hover:bg-[var(--accent-red)]/10 flex items-center gap-2"
+                            >
+                                <Trash2 size={14} />
+                                Delete
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Title */}
-            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{decision.title}</h3>
+            <h3 className="font-medium text-[var(--text-primary)] mb-2 line-clamp-2 group-hover:text-[var(--accent-blue)] transition-colors">
+                {decision.title}
+            </h3>
 
             {/* Context */}
-            <p className="text-gray-500 text-sm mb-4 line-clamp-2 flex-grow">
+            <p className="text-[var(--text-secondary)] text-sm mb-4 line-clamp-2">
                 {decision.context || "No context provided."}
             </p>
 
             {/* Footer */}
-            <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md ${outcome.bg} ${outcome.text}`}>
+            <div className="flex items-center justify-between pt-3 border-t border-[var(--border-default)]">
+                <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md ${outcome.bg} ${outcome.text}`}>
                     {outcome.icon}
-                    {decision.outcome}
+                    {outcome.label}
                 </span>
-                <div className="flex gap-0.5">
+
+                {/* Confidence indicator */}
+                <div className="flex items-center gap-1" title={`Confidence: ${decision.confidence_level}/5`}>
                     {[...Array(5)].map((_, i) => (
                         <div
                             key={i}
-                            className={`w-1.5 h-3 rounded-sm ${i < decision.confidence_level ? 'bg-gray-900' : 'bg-gray-200'
+                            className={`w-1.5 h-4 rounded-sm transition-colors ${i < decision.confidence_level
+                                    ? 'bg-[var(--text-primary)]'
+                                    : 'bg-[var(--border-default)]'
                                 }`}
                         />
                     ))}

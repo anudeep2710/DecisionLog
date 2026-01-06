@@ -12,19 +12,11 @@ export default function EditDecisionPage() {
 
     useEffect(() => {
         const fetchDecision = async () => {
-            // We can fetch from backend or directly from Supabase if we want
-            // Let's use backend to be consistent with architecture
             const { data: { session } } = await supabase.auth.getSession()
             if (!session) {
                 router.push('/login')
                 return
             }
-
-            // Since we don't have a GET /decisions/{id} endpoint yet in the router (oops, I did not add it explicitely as a single get, only list), 
-            // I should add it or use Supabase client directly here as a fallback or fix backend.
-            // Let's use supabase client for read for simplicity and speed, as we have RLS.
-            // Actually, let's just add the ONE endpoint to backend to be clean? 
-            // Nah, using Supabase client for reading a single item is perfectly fine in this architecture.
 
             const { data, error } = await supabase
                 .from('decisions')
@@ -46,16 +38,35 @@ export default function EditDecisionPage() {
     }, [id, router])
 
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+        <div className="min-h-[calc(100vh-48px)] flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <div className="flex gap-1">
+                    {[0, 1, 2].map((i) => (
+                        <div
+                            key={i}
+                            className="w-2 h-2 rounded-full bg-[var(--text-tertiary)]"
+                            style={{
+                                animation: 'bounce 1s ease-in-out infinite',
+                                animationDelay: `${i * 0.15}s`
+                            }}
+                        />
+                    ))}
+                </div>
+                <p className="text-sm text-[var(--text-tertiary)]">Loading decision...</p>
+
+                <style jsx>{`
+                    @keyframes bounce {
+                        0%, 80%, 100% { transform: translateY(0); }
+                        40% { transform: translateY(-8px); }
+                    }
+                `}</style>
+            </div>
         </div>
     )
 
     return (
-        <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-                {decision && <DecisionForm initialData={decision} isEditing={true} />}
-            </div>
+        <div className="min-h-[calc(100vh-48px)] py-8 px-4 sm:px-6">
+            {decision && <DecisionForm initialData={decision} isEditing={true} />}
         </div>
     )
 }
