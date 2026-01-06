@@ -123,40 +123,69 @@ alter table teams enable row level security;
 alter table team_members enable row level security;
 
 -- =====================================================
--- TEAM RLS POLICIES
+-- TEAM RLS POLICIES (Fixed - no recursion)
 -- =====================================================
 
--- Teams: members can view their teams
+-- Helper function to check team membership (bypasses RLS)
+create or replace function public.is_team_member(check_team_id uuid, check_user_id uuid)
+returns boolean as $$
+begin
+  return exists (
+    select 1 from public.team_members 
+    where team_id = check_team_id and user_id = check_user_id
+  );
+end;
+$$ language plpgsql security definer;
+
+-- Helper function to check admin role (bypasses RLS)
+create or replace function public.is_team_admin(check_team_id uuid, check_user_id uuid)
+returns boolean as $$
+begin
+  return exists (
+    select 1 from public.team_members 
+    where team_id = check_team_id and user_id = check_user_id and role in ('owner', 'admin')
+  );
+end;
+$$ language plpgsql security definer;
+
+-- Teams: members can view their teams (uses helper function)
 create policy "Team members can view team" on teams for select using (
-  exists (select 1 from team_members where team_id = teams.id and user_id = auth.uid())
+  public.is_team_member(id, auth.uid())
 );
 
 -- Teams: creator can insert
 create policy "Users can create teams" on teams for insert with check (auth.uid() = created_by);
 
--- Teams: owner/admin can update
+-- Teams: owner/admin can update (uses helper function)
 create policy "Team admins can update team" on teams for update using (
-  exists (select 1 from team_members where team_id = teams.id and user_id = auth.uid() and role in ('owner', 'admin'))
+  public.is_team_admin(id, auth.uid())
 );
 
 -- Teams: only owner can delete
 create policy "Team owner can delete team" on teams for delete using (created_by = auth.uid());
 
--- Team members: members can view other members in their teams
+-- Team members: users can view their own membership record
+create policy "Users can view own membership" on team_members for select using (
+  user_id = auth.uid()
+);
+
+-- Team members: users can view members of teams they belong to
 create policy "Members can view team members" on team_members for select using (
-  exists (select 1 from team_members tm where tm.team_id = team_members.team_id and tm.user_id = auth.uid())
+  public.is_team_member(team_id, auth.uid())
 );
 
--- Team members: owner/admin can add members
+-- Team members: team creator can add first member (trigger handles this)
+-- For subsequent members, admins can add
 create policy "Admins can add team members" on team_members for insert with check (
-  exists (select 1 from team_members tm where tm.team_id = team_members.team_id and tm.user_id = auth.uid() and tm.role in ('owner', 'admin'))
-  or exists (select 1 from teams t where t.id = team_members.team_id and t.created_by = auth.uid()) -- creator adding first member (themselves)
+  -- Allow the team creator to add themselves (handled by trigger)
+  (select created_by from teams where id = team_id) = auth.uid()
+  or public.is_team_admin(team_id, auth.uid())
 );
 
--- Team members: owner/admin can remove members
+-- Team members: admins can remove, or users can remove themselves
 create policy "Admins can remove team members" on team_members for delete using (
-  exists (select 1 from team_members tm where tm.team_id = team_members.team_id and tm.user_id = auth.uid() and tm.role in ('owner', 'admin'))
-  or user_id = auth.uid() -- users can leave teams
+  user_id = auth.uid() -- users can leave
+  or public.is_team_admin(team_id, auth.uid()) -- admins can remove
 );
 
 -- =====================================================
@@ -167,9 +196,7 @@ create policy "Admins can remove team members" on team_members for delete using 
 drop policy if exists "Users can view their own decisions" on decisions;
 create policy "Users can view own and team decisions" on decisions for select using (
   user_id = auth.uid()  -- personal decisions
-  or (team_id is not null and exists (
-    select 1 from team_members where team_id = decisions.team_id and user_id = auth.uid()
-  ))  -- team decisions
+  or (team_id is not null and public.is_team_member(team_id, auth.uid()))  -- team decisions
 );
 
 -- Update insert policy to allow team decisions
@@ -178,7 +205,7 @@ create policy "Users can insert decisions" on decisions for insert with check (
   auth.uid() = user_id
   and (
     team_id is null  -- personal decision
-    or exists (select 1 from team_members where team_id = decisions.team_id and user_id = auth.uid())  -- team decision
+    or public.is_team_member(team_id, auth.uid())  -- team decision
   )
 );
 
@@ -186,9 +213,7 @@ create policy "Users can insert decisions" on decisions for insert with check (
 drop policy if exists "Users can update their own decisions" on decisions;
 create policy "Users can update own and team decisions" on decisions for update using (
   user_id = auth.uid()  -- own decisions
-  or (team_id is not null and exists (
-    select 1 from team_members where team_id = decisions.team_id and user_id = auth.uid() and role in ('owner', 'admin')
-  ))  -- team admins can update
+  or (team_id is not null and public.is_team_admin(team_id, auth.uid()))  -- team admins can update
 );
 
 -- =====================================================
