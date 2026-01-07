@@ -34,11 +34,13 @@ A modern, full-stack decision tracking web application built with **Next.js** an
 - ✅ **User Authentication** - Secure local JWT-based login/registration
 - ✅ **Decision CRUD** - Create, read, update, delete decisions with full context
 - ✅ **Dashboard** - View all decisions with search, filter, and sort capabilities
+- ✅ **Kanban Board** - Drag-and-drop workflow status (To Do, In Progress, Review, Done)
+- ✅ **Visual Whiteboard** - Interactive SVG-based decision flow diagrams
 - ✅ **Protected Routes** - Authentication required for dashboard access
 
 ### Advanced Features
 - 🏷️ **Tags** - Organize decisions with color-coded tags
-- 📊 **Analytics** - Visual charts for success rate, confidence trends
+- 📊 **Analytics** - Visual charts for success rate, confidence trends, and workflow status
 - 📋 **Templates** - 6 pre-filled templates for common decision types
 - 👥 **Team Spaces** - Collaborate on decisions with invite codes
 - ✅ **Voting** - Team approve/reject/abstain votes
@@ -148,6 +150,11 @@ Authorization: Bearer <jwt_token>
 | POST | `/bot/query` | Query the AI chatbot |
 | GET | `/chat/{team_id}` | Get recent chat messages |
 | POST | `/chat/` | Send a chat message |
+| GET | `/whiteboards/` | Get all whiteboards |
+| POST | `/whiteboards/` | Create a whiteboard |
+| GET | `/whiteboards/{id}` | Get specific whiteboard |
+| PUT | `/whiteboards/{id}` | Update whiteboard data |
+| DELETE | `/whiteboards/{id}` | Delete whiteboard |
 
 📁 **Postman Collection**: `DecisionLog_API.postman_collection.json`
 

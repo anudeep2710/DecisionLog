@@ -1,448 +1,685 @@
 {
-	"info": {
-		"_postman_id": "decisionlog-api",
-		"name": "DecisionLog API",
-		"description": "API collection for DecisionLog - Decision Tracking Web Application",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:8000",
-			"type": "string"
-		},
-		{
-			"key": "token",
-			"value": "",
-			"type": "string"
-		}
-	],
-	"item": [
-		{
-			"name": "Decisions",
-			"item": [
-				{
-					"name": "Get All Decisions",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/decisions/",
-							"host": ["{{baseUrl}}"],
-							"path": ["decisions", ""]
-						}
-					}
-				},
-				{
-					"name": "Get Decisions by Team",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/decisions/?team_id={{teamId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["decisions", ""],
-							"query": [
-								{
-									"key": "team_id",
-									"value": "{{teamId}}"
-								}
-							]
-						}
-					}
-				},
-				{
-					"name": "Create Decision",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"Sample Decision\",\n    \"context\": \"Context of the decision\",\n    \"choice_made\": \"The choice made\",\n    \"confidence_level\": 4,\n    \"status\": \"pending\",\n    \"outcome\": \"unknown\",\n    \"notes\": \"Additional notes\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/decisions/",
-							"host": ["{{baseUrl}}"],
-							"path": ["decisions", ""]
-						}
-					}
-				},
-				{
-					"name": "Update Decision",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"Updated Decision\",\n    \"status\": \"reviewed\",\n    \"outcome\": \"success\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/decisions/{{decisionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["decisions", "{{decisionId}}"]
-						}
-					}
-				},
-				{
-					"name": "Delete Decision",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/decisions/{{decisionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["decisions", "{{decisionId}}"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Teams",
-			"item": [
-				{
-					"name": "Get My Teams",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/teams/",
-							"host": ["{{baseUrl}}"],
-							"path": ["teams", ""]
-						}
-					}
-				},
-				{
-					"name": "Create Team",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"My Team\",\n    \"description\": \"Team description\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/teams/",
-							"host": ["{{baseUrl}}"],
-							"path": ["teams", ""]
-						}
-					}
-				},
-				{
-					"name": "Join Team",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"invite_code\": \"ABC123\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/teams/join",
-							"host": ["{{baseUrl}}"],
-							"path": ["teams", "join"]
-						}
-					}
-				},
-				{
-					"name": "Get Team Decisions",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/teams/{{teamId}}/decisions",
-							"host": ["{{baseUrl}}"],
-							"path": ["teams", "{{teamId}}", "decisions"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Tags",
-			"item": [
-				{
-					"name": "Get All Tags",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/tags/",
-							"host": ["{{baseUrl}}"],
-							"path": ["tags", ""]
-						}
-					}
-				},
-				{
-					"name": "Create Tag",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"work\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/tags/",
-							"host": ["{{baseUrl}}"],
-							"path": ["tags", ""]
-						}
-					}
-				},
-				{
-					"name": "Add Tag to Decision",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"decision_id\": \"{{decisionId}}\",\n    \"tag_id\": \"{{tagId}}\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/tags/decision",
-							"host": ["{{baseUrl}}"],
-							"path": ["tags", "decision"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Comments",
-			"item": [
-				{
-					"name": "Get Decision Comments",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/comments/decision/{{decisionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["comments", "decision", "{{decisionId}}"]
-						}
-					}
-				},
-				{
-					"name": "Create Comment",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"decision_id\": \"{{decisionId}}\",\n    \"content\": \"Follow-up note\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/comments/",
-							"host": ["{{baseUrl}}"],
-							"path": ["comments", ""]
-						}
-					}
-				},
-				{
-					"name": "Update Comment",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"content\": \"Updated note\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/comments/{{commentId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["comments", "{{commentId}}"]
-						}
-					}
-				},
-				{
-					"name": "Delete Comment",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/comments/{{commentId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["comments", "{{commentId}}"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Votes",
-			"item": [
-				{
-					"name": "Get Decision Votes",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/votes/decision/{{decisionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["votes", "decision", "{{decisionId}}"]
-						}
-					}
-				},
-				{
-					"name": "Cast Vote",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"decision_id\": \"{{decisionId}}\",\n    \"vote\": \"approve\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/votes/",
-							"host": ["{{baseUrl}}"],
-							"path": ["votes", ""]
-						}
-					}
-				},
-				{
-					"name": "Remove Vote",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/votes/decision/{{decisionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["votes", "decision", "{{decisionId}}"]
-						}
-					}
-				}
-			]
-		}
-	]
+    "info": {
+        "_postman_id": "decisionlog-api",
+        "name": "DecisionLog API",
+        "description": "API collection for DecisionLog - Decision Tracking Web Application",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8000",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Decisions",
+            "item": [
+                {
+                    "name": "Get All Decisions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/decisions/",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "decisions",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Decisions by Team",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/decisions/?team_id={{teamId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "decisions",
+                                ""
+                            ],
+                            "query": [
+                                {
+                                    "key": "team_id",
+                                    "value": "{{teamId}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Decision",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Sample Decision\",\n    \"context\": \"Context of the decision\",\n    \"choice_made\": \"The choice made\",\n    \"confidence_level\": 4,\n    \"status\": \"pending\",\n    \"outcome\": \"unknown\",\n    \"notes\": \"Additional notes\",\n    \"team_id\": null\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/decisions/",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "decisions",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Decision",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Updated Decision\",\n    \"status\": \"reviewed\",\n    \"outcome\": \"success\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/decisions/{{decisionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "decisions",
+                                "{{decisionId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Decision",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/decisions/{{decisionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "decisions",
+                                "{{decisionId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Teams",
+            "item": [
+                {
+                    "name": "Get My Teams",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teams/",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teams",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Team",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"My Team\",\n    \"description\": \"Team description\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/teams/",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teams",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Join Team",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"invite_code\": \"ABC123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/teams/join",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teams",
+                                "join"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Team Decisions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/teams/{{teamId}}/decisions",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "teams",
+                                "{{teamId}}",
+                                "decisions"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Tags",
+            "item": [
+                {
+                    "name": "Get All Tags",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/tags/",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "tags",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Tag",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"work\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/tags/",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "tags",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Tag to Decision",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"decision_id\": \"{{decisionId}}\",\n    \"tag_id\": \"{{tagId}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/tags/decision",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "tags",
+                                "decision"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Comments",
+            "item": [
+                {
+                    "name": "Get Decision Comments",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/comments/decision/{{decisionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "comments",
+                                "decision",
+                                "{{decisionId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Comment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"decision_id\": \"{{decisionId}}\",\n    \"content\": \"Follow-up note\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/comments/",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "comments",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Comment",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"content\": \"Updated note\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/comments/{{commentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "comments",
+                                "{{commentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Comment",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/comments/{{commentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "comments",
+                                "{{commentId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Votes",
+            "item": [
+                {
+                    "name": "Get Decision Votes",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/votes/decision/{{decisionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "votes",
+                                "decision",
+                                "{{decisionId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cast Vote",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"decision_id\": \"{{decisionId}}\",\n    \"vote\": \"approve\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/votes/",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "votes",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Remove Vote",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/votes/decision/{{decisionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "votes",
+                                "decision",
+                                "{{decisionId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Whiteboards",
+            "item": [
+                {
+                    "name": "Get Whiteboards",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/whiteboards/?team_id={{teamId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "whiteboards",
+                                ""
+                            ],
+                            "query": [
+                                {
+                                    "key": "team_id",
+                                    "value": "{{teamId}}",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Whiteboard",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Project Alpha Flow\",\n    \"team_id\": null,\n    \"data\": \"[]\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/whiteboards/",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "whiteboards",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Whiteboard",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/whiteboards/{{whiteboardId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "whiteboards",
+                                "{{whiteboardId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Whiteboard",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Updated Flow Name\",\n    \"data\": \"[{\\\"id\\\":\\\"1\\\",\\\"type\\\":\\\"rect\\\"}]\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/whiteboards/{{whiteboardId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "whiteboards",
+                                "{{whiteboardId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Whiteboard",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/whiteboards/{{whiteboardId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "whiteboards",
+                                "{{whiteboardId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
 }
