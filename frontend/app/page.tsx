@@ -30,10 +30,10 @@ export default function Home() {
             <ArrowRight size={18} />
           </Link>
           <Link
-            href="/login"
+            href="/features"
             className="btn-secondary inline-flex items-center justify-center gap-2 text-base px-6 py-3"
           >
-            Sign in →
+            See all features
           </Link>
         </div>
       </section>
