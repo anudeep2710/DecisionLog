@@ -6,6 +6,19 @@ A modern, full-stack decision tracking web application built with **Next.js** an
 
 ---
 
+## 📸 Screenshots
+
+### Homepage
+![Homepage](screenshots/homepage.png)
+
+### Features Page
+![Features](screenshots/features.png)
+
+### Login Page
+![Login](screenshots/login.png)
+
+---
+
 ## 🚀 Features
 
 ### Core Features
