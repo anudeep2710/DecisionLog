@@ -234,14 +234,23 @@ export default function Dashboard() {
                             Welcome back, {user?.user_metadata?.full_name || 'there'}
                         </p>
                     </div>
-                    <Link
-                        href="/dashboard/new"
-                        className="btn-primary inline-flex items-center gap-2 text-sm"
-                    >
-                        <Plus size={16} />
-                        New Decision
-                        <kbd className="hidden sm:inline-flex ml-1 px-1.5 py-0.5 text-[10px] rounded bg-white/20">N</kbd>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href="/analytics"
+                            className="btn-secondary inline-flex items-center gap-2 text-sm"
+                        >
+                            <BarChart2 size={16} />
+                            Analytics
+                        </Link>
+                        <Link
+                            href="/dashboard/new"
+                            className="btn-primary inline-flex items-center gap-2 text-sm"
+                        >
+                            <Plus size={16} />
+                            New Decision
+                            <kbd className="hidden sm:inline-flex ml-1 px-1.5 py-0.5 text-[10px] rounded bg-white/20">N</kbd>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Team Spaces */}
