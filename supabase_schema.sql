@@ -46,6 +46,16 @@ create table comments (
   updated_at timestamptz default now()
 );
 
+-- Create votes table (team decision voting)
+create table votes (
+  id uuid default gen_random_uuid() primary key,
+  decision_id uuid references decisions on delete cascade not null,
+  user_id uuid references auth.users on delete cascade not null,
+  vote text check (vote in ('approve', 'reject', 'abstain')) not null,
+  created_at timestamptz default now(),
+  unique(decision_id, user_id)
+);
+
 -- Enable Row Level Security
 alter table profiles enable row level security;
 alter table decisions enable row level security;

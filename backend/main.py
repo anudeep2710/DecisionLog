@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import decisions, teams, tags, comments
+from routers import decisions, teams, tags, comments, votes
 import uvicorn
 
 app = FastAPI(title="DecisionLog API")
@@ -24,6 +24,7 @@ app.include_router(decisions.router)
 app.include_router(teams.router)
 app.include_router(tags.router)
 app.include_router(comments.router)
+app.include_router(votes.router)
 
 @app.get("/")
 def root():
