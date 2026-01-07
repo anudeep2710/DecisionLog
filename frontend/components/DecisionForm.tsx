@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import TemplateSelector, { DecisionTemplate } from '@/components/TemplateSelector'
 import { ArrowLeft, Check } from 'lucide-react'
 
 interface Decision {
@@ -89,12 +90,25 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
             <form onSubmit={handleSubmit} className="notion-card p-6 space-y-6">
                 {/* Header */}
                 <div className="pb-4 border-b border-[var(--border-default)]">
-                    <h2 className="text-xl font-bold text-[var(--text-primary)]">
-                        {isEditing ? 'Edit Decision' : 'Log a Decision'}
-                    </h2>
-                    <p className="text-[var(--text-secondary)] text-sm mt-1">
-                        Record your thought process for future reflection
-                    </p>
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-xl font-bold text-[var(--text-primary)]">
+                                {isEditing ? 'Edit Decision' : 'Log a Decision'}
+                            </h2>
+                            <p className="text-[var(--text-secondary)] text-sm mt-1">
+                                Record your thought process for future reflection
+                            </p>
+                        </div>
+                        {!isEditing && (
+                            <TemplateSelector onSelectTemplate={(template: DecisionTemplate) => {
+                                setFormData(prev => ({
+                                    ...prev,
+                                    context: template.prefill.context,
+                                    confidence_level: template.prefill.confidence_level
+                                }))
+                            }} />
+                        )}
+                    </div>
                 </div>
 
                 {/* Title */}
@@ -154,8 +168,8 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
                                     type="button"
                                     onClick={() => setFormData(prev => ({ ...prev, confidence_level: level }))}
                                     className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${formData.confidence_level >= level
-                                            ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
-                                            : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                                        ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
+                                        : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                                         }`}
                                 >
                                     {level}
@@ -196,8 +210,8 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
                                     type="button"
                                     onClick={() => setFormData(prev => ({ ...prev, outcome: opt.value as any }))}
                                     className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${formData.outcome === opt.value
-                                            ? `bg-[${opt.color}]/20 text-[${opt.color}]`
-                                            : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                                        ? `bg-[${opt.color}]/20 text-[${opt.color}]`
+                                        : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                                         }`}
                                     style={{
                                         backgroundColor: formData.outcome === opt.value ? `color-mix(in srgb, ${opt.color} 15%, transparent)` : undefined,

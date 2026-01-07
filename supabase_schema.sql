@@ -36,6 +36,16 @@ create table decision_tags (
   primary key (decision_id, tag_id)
 );
 
+-- Create comments table (follow-up notes on decisions)
+create table comments (
+  id uuid default gen_random_uuid() primary key,
+  decision_id uuid references decisions on delete cascade not null,
+  user_id uuid references auth.users on delete cascade not null,
+  content text not null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
 -- Enable Row Level Security
 alter table profiles enable row level security;
 alter table decisions enable row level security;
