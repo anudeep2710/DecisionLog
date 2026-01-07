@@ -1,12 +1,12 @@
 # DecisionLog
 
-A modern, full-stack decision tracking web application built with **Next.js** and **FastAPI** to help individuals and teams log, track, and learn from their decisions.
+DecisionLog is a comprehensive decision tracking and collaboration platform designed to help teams and individuals document, analyze, and reflect on their decision-making processes. It combines structured data logging with visual whiteboarding and real-time collaboration tools.
 
-![Next.js](https://img.shields.io/badge/Next.js-14-black) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-green) ![SQLite](https://img.shields.io/badge/SQLite-Database-blue) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Styling-cyan)
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js) ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=flat-square&logo=fastapi&logoColor=white) ![SQLite](https://img.shields.io/badge/SQLite-Data_Persistence-003B57?style=flat-square&logo=sqlite&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Styling-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 
 ---
 
-## 📸 Screenshots
+## Application Screenshots
 
 ### Homepage
 ![Homepage](screenshots/start.png)
@@ -17,229 +17,158 @@ A modern, full-stack decision tracking web application built with **Next.js** an
 ### Team Chat
 ![Team Chat](screenshots/teamchat.png)
 
-### Analytics
+### Analytics Dashboard
 ![Analytics](screenshots/analytics.png)
 
-### Whiteboard Flow
+### Decision Flow
 ![Decision Flow](screenshots/decison-flow.png)
 
-### Login Page
+### Authentication
 ![Login](screenshots/login.png)
 
 ---
 
-## 🚀 Features
+## Key Features
 
-### Core Features
-- ✅ **User Authentication** - Secure local JWT-based login/registration
-- ✅ **Decision CRUD** - Create, read, update, delete decisions with full context
-- ✅ **Dashboard** - View all decisions with search, filter, and sort capabilities
-- ✅ **Kanban Board** - Drag-and-drop workflow status (To Do, In Progress, Review, Done)
-- ✅ **Visual Whiteboard** - Interactive SVG-based decision flow diagrams
-- ✅ **Protected Routes** - Authentication required for dashboard access
+### Core Functionality
+- **Secure Authentication**: Local JWT-based system with protected route management.
+- **Decision Management**: Full CRUD operations for detailed decision records.
+- **Interactive Dashboard**: Centralized view with advanced filtering and search.
+- **Kanban Workflow**: Drag-and-drop status management (To Do, In Progress, Review, Done).
+- **Visual Whiteboard**: SVG-based tool for mapping decision flows and logic.
 
-### Advanced Features
-- 🏷️ **Tags** - Organize decisions with color-coded tags
-- 📊 **Analytics** - Visual charts for success rate, confidence trends, and workflow status
-- 📋 **Templates** - 6 pre-filled templates for common decision types
-- 👥 **Team Spaces** - Collaborate on decisions with invite codes
-- ✅ **Voting** - Team approve/reject/abstain votes
-- 💬 **Comments** - Follow-up notes on decisions
-- 📰 **Activity Feed** - Real-time team activity stream
-- 🤖 **Decision Helper** - AI Chatbot to answer questions about your data
-- 💬 **Team Chat** - Real-time collaboration in Team Spaces
-- 🌙 **Dark Mode** - Theme toggle with system preference respect
-- ❓ **Interactive Help** - Built-in tour for new users
+### Collaboration & Organization
+- **Team Spaces**: Dedicated workspaces for team collaboration.
+- **Real-time Chat**: Integrated messaging for immediate team communication.
+- **Decision Voting**: structured approval workflows (Approve, Reject, Abstain).
+- **Comments**: Contextual discussion threads on individual decisions.
+- **Activity Feed**: chronological stream of team actions and updates.
 
----
+### Intelligence & Insights
+- **Advanced Analytics**: Data visualization for success rates, confidence levels, and workflow throughput.
+- **AI Assistant**: Intelligent chatbot for querying decision history and patterns.
+- **Smart Templates**: Pre-configured structures for common decision types.
 
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Frontend | Next.js 14, React, TypeScript |
-| Styling | TailwindCSS, Custom CSS Variables |
-| Backend | FastAPI (Python) |
-| Database | SQLite (Local file-based database) |
-| Auth | Custom JWT Authentication (FastAPI + OAuth2PasswordBearer) |
-| ORM | SQLAlchemy |
-| Hosting | Vercel (Frontend), Any Python host (Backend) |
+### User Experience
+- **Dark Mode**: Fully adaptive theme support.
+- **Interactive Onboarding**: Guided tour for new user orientation.
 
 ---
 
-## 📦 Installation
+## Technology Architecture
+
+| Component | specification |
+|-----------|---------------|
+| **Frontend** | Next.js 14, React, TypeScript |
+| **Styling** | TailwindCSS, CSS Modules |
+| **Backend** | FastAPI (Python 3.9+) |
+| **Database** | SQLite (SQLAlchemy ORM) |
+| **Security** | OAuth2 with JWT, BCrypt Hashing |
+| **Architecture** | RESTful API, Client-Side Rendering |
+
+---
+
+## Installation Guide
 
 ### Prerequisites
-- Node.js 18+
-- Python 3.9+
+- Node.js 18 or higher
+- Python 3.9 or higher
 
-### 1. Clone the repository
+### 1. Repository Setup
 ```bash
 git clone https://github.com/anudeep2710/DecisionLog.git
 cd DecisionLog
 ```
 
-### 2. Set up the Backend
+### 2. Backend Configuration
+Navigate to the backend directory and initialize the environment:
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Mac/Linux
+# Activate Virtual Environment
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+# source venv/bin/activate
+```
+
+Install dependencies:
+```bash
 pip install -r requirements.txt
 ```
 
-No complex environment variables needed for local development! The app uses a local SQLite database by default.
-
-### 3. Run the Backend
+### 3. Start Backend Server
 ```bash
 venv\Scripts\python main.py
 ```
-The backend API will start at `http://localhost:8000`. It will automatically create the `decisionlog.db` SQLite file.
+The server will initialize at `http://localhost:8000`. The SQLite database is automatically generated on the first run.
 
-### 4. Set up the Frontend
-Open a new terminal:
+### 4. Frontend Configuration
+Open a new terminal session and navigate to the frontend directory:
 ```bash
 cd frontend
 npm install
 ```
 
-Create `frontend/.env.local` (optional, defaults to localhost:8000):
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-### 5. Run the Frontend
+### 5. Start Application
 ```bash
 npm run dev
 ```
-
-Access at: http://localhost:3000
+The application will be accessible at `http://localhost:3000`.
 
 ---
 
-## 📡 API Documentation
+## API Documentation
 
-### Base URL
-```
-http://localhost:8000
-```
+### Base Configuration
+**Base URL**: `http://localhost:8000`
 
-### Authentication
-All protected endpoints require Bearer token:
-```
-Authorization: Bearer <jwt_token>
-```
+**Authentication**: Bearer Token required for all protected endpoints.
 
-### Endpoints
+### Primary Endpoints
 
-| Method | Endpoint | Description |
+| Method | Resource | Description |
 |--------|----------|-------------|
-| GET | `/decisions/` | Get all user decisions |
-| POST | `/decisions/` | Create a decision |
-| PUT | `/decisions/{id}` | Update a decision |
-| DELETE | `/decisions/{id}` | Delete a decision |
-| GET | `/teams/` | Get user's teams |
-| POST | `/teams/` | Create a team |
-| POST | `/teams/join` | Join team by code |
-| GET | `/tags/` | Get all tags |
-| POST | `/tags/` | Create a tag |
-| GET | `/comments/decision/{id}` | Get decision comments |
-| POST | `/comments/` | Add a comment |
-| GET | `/votes/decision/{id}` | Get vote summary |
-| POST | `/votes/` | Cast a vote |
-| POST | `/bot/query` | Query the AI chatbot |
-| GET | `/chat/{team_id}` | Get recent chat messages |
-| POST | `/chat/` | Send a chat message |
-| GET | `/whiteboards/` | Get all whiteboards |
-| POST | `/whiteboards/` | Create a whiteboard |
-| GET | `/whiteboards/{id}` | Get specific whiteboard |
-| PUT | `/whiteboards/{id}` | Update whiteboard data |
-| DELETE | `/whiteboards/{id}` | Delete whiteboard |
+| **GET** | `/decisions/` | Retrieve user/team decisions |
+| **POST** | `/decisions/` | Create new decision record |
+| **PUT** | `/decisions/{id}` | Update decision details |
+| **GET** | `/teams/` | List associated teams |
+| **POST** | `/teams/join` | Join team via invite code |
+| **GET** | `/whiteboards/` | Retrieve all whiteboard sessions |
+| **POST** | `/whiteboards/` | Initialize new whiteboard |
+| **POST** | `/chat/` | Send team message |
+| **POST** | `/bot/query` | Query AI assistant |
 
-📁 **Postman Collection**: `DecisionLog_API.postman_collection.json`
+Full API specification available in `DecisionLog_API.postman_collection.json`.
 
 ---
 
-## 🔐 Security Features
+## Security Implementation
 
-- **Password Hashing**: SHA256 Crypt (Passlib)
-- **JWT Authentication**: Stateless, signed tokens with HS256
-- **Protected Routes**: Middleware checks auth on frontend
-- **Row Level Security**: Application-level authorization in FastAPI
-- **Input Validation**: Pydantic models on backend
-- **CORS Configuration**: Restricted to allowed origins
+- **Password Storage**: SHA256-Crypt hashing via Passlib.
+- **Session Management**: Stateless JWT (JSON Web Tokens) with expiration.
+- **Access Control**: Role-based access logic for Team and Personal scopes.
+- **Data Safety**: Pydantic schema validation and parameterized queries.
 
 ---
 
-## 📈 Scaling Strategy
-
-### Current Architecture
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Next.js   │────▶│   FastAPI   │────▶│   SQLite    │
-│  (Frontend) │     │  (Backend)  │     │ (Local DB)  │
-└─────────────┘     └─────────────┘     └─────────────┘
-```
-
-### Production Scaling Recommendations
-
-#### 1. **Switch to PostgreSQL**
-For production deployment, switch the `DATABASE_URL` environment variable in the backend to point to a PostgreSQL instance (e.g., Supabase, RDS, Railway). SQLAlchemy handles the dialect switch automatically.
-
-#### 2. **Horizontal Scaling**
-Deploy the FastAPI backend on a scalable platform like Railway or Render.
-
-#### 3. **Caching Layer**
-Add Redis for session/token caching or response caching if needed.
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 DecisionLog/
-├── frontend/
-│   ├── app/                    # Next.js pages
-│   │   ├── dashboard/          # Protected dashboard
-│   │   ├── login/              # Auth pages
-│   │   ├── register/
-│   │   ├── analytics/
-│   │   └── features/
-│   ├── components/             # Reusable components
-│   │   ├── Navbar.tsx
-│   │   ├── DecisionForm.tsx
-│   │   ├── TagSelector.tsx
-│   │   ├── VotingPanel.tsx
-│   │   └── HelpTour.tsx
-│   └── lib/                    # Utilities
+├── frontend/             # Next.js Application
+│   ├── app/              # App Router Pages
+│   ├── components/       # UI Components
+│   └── lib/              # Utility Functions
 │
-├── backend/
-│   ├── main.py                 # FastAPI entry point
-│   ├── auth.py                 # JWT authentication
-│   ├── database.py             # DB connection (SQLAlchemy)
-│   ├── models.py               # SQLAlchemy models
-│   └── routers/                # API routes
-│       ├── decisions.py
-│       ├── teams.py
-│       ├── tags.py
-│       ├── comments.py
-│       ├── votes.py
-│       ├── chat.py
-│       └── bot.py
-│   └── test_comprehensive.py   # Test suite
+├── backend/              # FastAPI Server
+│   ├── routers/          # API Route Controllers
+│   ├── models.py         # Database Schema
+│   └── auth.py           # Security Logic
 │
-├── supabase_schema.sql         # Legacy schema reference
-└── DecisionLog_API.postman_collection.json
+└── screenshots/          # Application Visuals
 ```
 
 ---
 
-## 👨‍💻 Author
-
-**Anudeep Batchu**
-
----
-
-## 📄 License
-
-MIT License - feel free to use this project for learning and development.
+**Author**: Anudeep Batchu
