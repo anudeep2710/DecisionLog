@@ -72,6 +72,7 @@ export default function Navbar() {
                         {user && (
                             <div className="hidden md:flex items-center gap-1 ml-2">
                                 <NavLink href="/dashboard" icon={LayoutDashboard}>Dashboard</NavLink>
+                                <NavLink href="/dashboard/whiteboards" icon={LayoutDashboard}>Flows</NavLink>
                             </div>
                         )}
                     </div>

@@ -9,7 +9,7 @@ interface Decision {
     context: string
     choice_made: string
     confidence_level: number
-    status: 'pending' | 'reviewed'
+    status: 'pending' | 'reviewed' | 'in_progress' | 'done' | string
     outcome: 'success' | 'failure' | 'unknown'
     created_at: string
 }
@@ -67,8 +67,8 @@ export default function DecisionCard({ decision, onDelete }: Props) {
             <div className="flex items-start justify-between gap-2 mb-3">
                 <div className="flex items-center gap-2 flex-wrap">
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full uppercase tracking-wide ${decision.status === 'pending'
-                            ? 'bg-[var(--accent-yellow)]/15 text-[var(--accent-yellow)]'
-                            : 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
+                        ? 'bg-[var(--accent-yellow)]/15 text-[var(--accent-yellow)]'
+                        : 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
                         }`}>
                         {decision.status}
                     </span>
@@ -132,8 +132,8 @@ export default function DecisionCard({ decision, onDelete }: Props) {
                         <div
                             key={i}
                             className={`w-1.5 h-4 rounded-sm transition-colors ${i < decision.confidence_level
-                                    ? 'bg-[var(--text-primary)]'
-                                    : 'bg-[var(--border-default)]'
+                                ? 'bg-[var(--text-primary)]'
+                                : 'bg-[var(--border-default)]'
                                 }`}
                         />
                     ))}

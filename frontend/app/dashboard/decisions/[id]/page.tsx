@@ -76,7 +76,7 @@ export default function EditDecisionPage() {
     return (
         <div className="max-w-3xl mx-auto px-4 py-8">
             <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-6">Edit Decision</h1>
-            {decision && <DecisionForm decision={decision} />}
+            {decision && <DecisionForm initialData={decision} isEditing={true} />}
         </div>
     )
 }

@@ -1,6 +1,6 @@
 "use client"
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import TemplateSelector, { DecisionTemplate } from '@/components/TemplateSelector'
 import { ArrowLeft, Check } from 'lucide-react'
@@ -11,9 +11,10 @@ interface Decision {
     context: string
     choice_made: string
     confidence_level: number
-    status: 'pending' | 'reviewed'
+    status: 'pending' | 'reviewed' | 'in_progress' | 'done' | string
     outcome: 'success' | 'failure' | 'unknown'
     notes: string
+    team_id?: string
 }
 
 interface Props {
@@ -23,6 +24,9 @@ interface Props {
 
 export default function DecisionForm({ initialData, isEditing = false }: Props) {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const teamId = searchParams.get('teamId')
+
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState<Decision>(initialData || {
         title: '',
@@ -31,7 +35,8 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
         confidence_level: 3,
         status: 'pending',
         outcome: 'unknown',
-        notes: ''
+        notes: '',
+        team_id: teamId || undefined
     })
 
     const backendUrl = "http://localhost:8000"
@@ -92,8 +97,13 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
                 <div className="pb-4 border-b border-[var(--border-default)]">
                     <div className="flex items-start justify-between gap-4">
                         <div>
-                            <h2 className="text-xl font-bold text-[var(--text-primary)]">
+                            <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
                                 {isEditing ? 'Edit Decision' : 'Log a Decision'}
+                                {teamId && (
+                                    <span className="text-xs bg-[var(--accent-purple)]/10 text-[var(--accent-purple)] px-2 py-1 rounded-full border border-[var(--accent-purple)]/20 font-medium">
+                                        Team Space
+                                    </span>
+                                )}
                             </h2>
                             <p className="text-[var(--text-secondary)] text-sm mt-1">
                                 Record your thought process for future reflection
@@ -187,8 +197,10 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
                             onChange={handleChange}
                             className="w-full px-3 py-2 rounded-md text-sm"
                         >
-                            <option value="pending">Pending Review</option>
-                            <option value="reviewed">Reviewed</option>
+                            <option value="pending">To Do</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="reviewed">In Review</option>
+                            <option value="done">Done</option>
                         </select>
                     </div>
                 </div>

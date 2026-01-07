@@ -99,10 +99,26 @@ def update_decision(
     current_user: User = Depends(get_current_user)
 ):
     """Update a decision"""
-    db_decision = db.query(Decision).filter(
-        Decision.id == decision_id,
-        Decision.user_id == current_user.id
-    ).first()
+    db_decision = db.query(Decision).filter(Decision.id == decision_id).first()
+    
+    if not db_decision:
+        raise HTTPException(status_code=404, detail="Decision not found")
+
+    # Check permissions: owner OR team member
+    is_owner = db_decision.user_id == current_user.id
+    is_team_member = False
+    
+    if db_decision.team_id:
+        from models import TeamMember
+        team_membership = db.query(TeamMember).filter(
+            TeamMember.team_id == db_decision.team_id,
+            TeamMember.user_id == current_user.id
+        ).first()
+        if team_membership:
+            is_team_member = True
+    
+    if not (is_owner or is_team_member):
+        raise HTTPException(status_code=403, detail="Not authorized to update this decision")
     
     if not db_decision:
         raise HTTPException(status_code=404, detail="Decision not found")
@@ -123,13 +139,28 @@ def delete_decision(
     current_user: User = Depends(get_current_user)
 ):
     """Delete a decision"""
-    db_decision = db.query(Decision).filter(
-        Decision.id == decision_id,
-        Decision.user_id == current_user.id
-    ).first()
+    """Delete a decision"""
+    # Find decision by ID first
+    db_decision = db.query(Decision).filter(Decision.id == decision_id).first()
     
     if not db_decision:
         raise HTTPException(status_code=404, detail="Decision not found")
+        
+    # Check permissions: owner OR team member
+    is_owner = db_decision.user_id == current_user.id
+    is_team_member = False
+    
+    if db_decision.team_id:
+        from models import TeamMember
+        team_membership = db.query(TeamMember).filter(
+            TeamMember.team_id == db_decision.team_id,
+            TeamMember.user_id == current_user.id
+        ).first()
+        if team_membership:
+            is_team_member = True
+    
+    if not (is_owner or is_team_member):
+        raise HTTPException(status_code=403, detail="Not authorized to delete this decision")
     
     db.delete(db_decision)
     db.commit()

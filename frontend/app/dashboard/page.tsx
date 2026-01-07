@@ -3,11 +3,14 @@ import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import DecisionCard from '@/components/DecisionCard'
 import TeamSpaces from '@/components/TeamSpaces'
+import TeamChat from '@/components/TeamChat'
+import KanbanBoard from '@/components/KanbanBoard'
 import Link from 'next/link'
 import {
     Plus, Search, Filter, ArrowUpDown, Download,
     BarChart2, CheckCircle, XCircle, Clock,
-    Calendar, TrendingUp, FileDown, FileJson, Users
+    Calendar, TrendingUp, FileDown, FileJson, Users,
+    LayoutGrid, List as ListIcon
 } from 'lucide-react'
 
 interface Decision {
@@ -16,7 +19,7 @@ interface Decision {
     context: string
     choice_made: string
     confidence_level: number
-    status: 'pending' | 'reviewed'
+    status: 'pending' | 'reviewed' | 'in_progress' | 'done' | string
     outcome: 'success' | 'failure' | 'unknown'
     created_at: string
     team_id?: string
@@ -24,13 +27,16 @@ interface Decision {
 
 type SortOption = 'newest' | 'oldest' | 'confidence' | 'outcome'
 type FilterOutcome = 'all' | 'success' | 'failure' | 'unknown'
-type FilterStatus = 'all' | 'pending' | 'reviewed'
+type FilterStatus = 'all' | 'pending' | 'in_progress' | 'reviewed' | 'done'
 
 export default function Dashboard() {
     const [decisions, setDecisions] = useState<Decision[]>([])
     const [loading, setLoading] = useState(true)
     const [user, setUser] = useState<any>(null)
     const router = useRouter()
+
+    // View State
+    const [viewMode, setViewMode] = useState<'list' | 'board'>('list')
 
     // Search, Sort, Filter states
     const [searchQuery, setSearchQuery] = useState('')
@@ -61,7 +67,8 @@ export default function Dashboard() {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'n' && !e.ctrlKey && !e.metaKey && document.activeElement?.tagName !== 'INPUT') {
                 e.preventDefault()
-                router.push('/dashboard/new')
+                const url = selectedTeamId ? `/dashboard/new?teamId=${selectedTeamId}` : '/dashboard/new'
+                router.push(url)
             }
             if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
                 e.preventDefault()
@@ -74,7 +81,7 @@ export default function Dashboard() {
         }
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [router])
+    }, [router, selectedTeamId])
 
     const fetchDecisions = async (token: string, teamId?: string | null) => {
         try {
@@ -115,9 +122,38 @@ export default function Dashboard() {
             })
             if (res.ok) {
                 setDecisions(decisions.filter(d => d.id !== id))
+            } else {
+                const err = await res.json()
+                alert(`Failed to delete: ${err.detail}`)
             }
         } catch (error) {
             console.error("Delete failed", error)
+            alert("Delete failed due to network error")
+        }
+    }
+
+    const handleStatusUpdate = async (id: string, newStatus: string) => {
+        // Optimistic local update
+        setDecisions(prev => prev.map(d =>
+            d.id === id ? { ...d, status: newStatus as any } : d
+        ))
+
+        try {
+            const token = localStorage.getItem('token')
+            if (!token) return
+            await fetch(`${backendUrl}/decisions/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+        } catch (error) {
+            console.error("Failed to update status", error)
+            // Revert on failure
+            const token = localStorage.getItem('token')
+            if (token) fetchDecisions(token, selectedTeamId)
         }
     }
 
@@ -244,7 +280,7 @@ export default function Dashboard() {
                             Analytics
                         </Link>
                         <Link
-                            href="/dashboard/new"
+                            href={selectedTeamId ? `/dashboard/new?teamId=${selectedTeamId}` : "/dashboard/new"}
                             className="btn-primary inline-flex items-center gap-2 text-sm"
                         >
                             <Plus size={16} />
@@ -254,8 +290,17 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Team Spaces */}
-                <TeamSpaces onTeamSelect={handleTeamSelect} selectedTeamId={selectedTeamId} />
+                {/* Team Spaces & Chat */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="md:col-span-1">
+                        <TeamSpaces onTeamSelect={handleTeamSelect} selectedTeamId={selectedTeamId} />
+                    </div>
+                    {selectedTeamId && user && (
+                        <div className="md:col-span-2">
+                            <TeamChat teamId={selectedTeamId} currentUserId={user.id} />
+                        </div>
+                    )}
+                </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -307,23 +352,6 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Activity Log */}
-                <div className="notion-card p-4 mb-8">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[var(--accent-purple)]/10 flex items-center justify-center">
-                            <TrendingUp size={20} className="text-[var(--accent-purple)]" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-[var(--text-primary)]">
-                                You logged {thisMonth} decision{thisMonth !== 1 ? 's' : ''} this month
-                            </p>
-                            <p className="text-xs text-[var(--text-tertiary)]">
-                                {reviewedThisMonth} reviewed • Keep up the great reflection!
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Search & Filters Bar */}
                 <div className="flex flex-col sm:flex-row gap-3 mb-6">
                     <div className="relative flex-1">
@@ -338,6 +366,24 @@ export default function Dashboard() {
                         />
                     </div>
                     <div className="flex gap-2">
+                        {/* View Toggle */}
+                        <div className="flex rounded-md border border-[var(--border-default)] p-1 bg-[var(--bg-primary)]">
+                            <button
+                                onClick={() => setViewMode('list')}
+                                className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}
+                                title="List View"
+                            >
+                                <ListIcon size={16} />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('board')}
+                                className={`p-1.5 rounded ${viewMode === 'board' ? 'bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}
+                                title="Board View"
+                            >
+                                <LayoutGrid size={16} />
+                            </button>
+                        </div>
+
                         <button
                             onClick={() => setShowFilters(!showFilters)}
                             className={`btn-secondary inline-flex items-center gap-2 text-sm ${showFilters ? 'bg-[var(--bg-hover)]' : ''}`}
@@ -405,7 +451,7 @@ export default function Dashboard() {
                         </div>
                         <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] ml-4">
                             <span>Status:</span>
-                            {['all', 'pending', 'reviewed'].map((s) => (
+                            {['all', 'pending', 'in_progress', 'reviewed', 'done'].map((s) => (
                                 <button
                                     key={s}
                                     onClick={() => setFilterStatus(s as FilterStatus)}
@@ -433,30 +479,36 @@ export default function Dashboard() {
                     </h2>
                 </div>
 
-                {/* Decisions Grid */}
-                {filteredDecisions.length === 0 ? (
-                    <div className="notion-card p-12 text-center">
-                        {decisions.length === 0 ? (
-                            <>
-                                <p className="text-[var(--text-secondary)] mb-4">No decisions logged yet</p>
-                                <Link
-                                    href="/dashboard/new"
-                                    className="inline-flex items-center gap-2 text-[var(--text-primary)] font-medium hover:underline"
-                                >
-                                    <Plus size={16} />
-                                    Create your first decision
-                                </Link>
-                            </>
-                        ) : (
-                            <p className="text-[var(--text-secondary)]">No decisions match your filters</p>
-                        )}
+                {/* Decisions View - LIST or BOARD */}
+                {viewMode === 'board' ? (
+                    <div className="animate-in fade-in duration-300">
+                        <KanbanBoard decisions={filteredDecisions} onStatusChange={handleStatusUpdate} />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                        {filteredDecisions.map(decision => (
-                            <DecisionCard key={decision.id} decision={decision} onDelete={handleDelete} />
-                        ))}
-                    </div>
+                    filteredDecisions.length === 0 ? (
+                        <div className="notion-card p-12 text-center animate-in fade-in zoom-in-95 duration-200">
+                            {decisions.length === 0 ? (
+                                <>
+                                    <p className="text-[var(--text-secondary)] mb-4">No decisions logged yet</p>
+                                    <Link
+                                        href={selectedTeamId ? `/dashboard/new?teamId=${selectedTeamId}` : "/dashboard/new"}
+                                        className="inline-flex items-center gap-2 text-[var(--text-primary)] font-medium hover:underline"
+                                    >
+                                        <Plus size={16} />
+                                        Create your first decision
+                                    </Link>
+                                </>
+                            ) : (
+                                <p className="text-[var(--text-secondary)]">No decisions match your filters</p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            {filteredDecisions.map(decision => (
+                                <DecisionCard key={decision.id} decision={decision} onDelete={handleDelete} />
+                            ))}
+                        </div>
+                    )
                 )}
             </div>
         </div>

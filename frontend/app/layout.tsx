@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import HelpTour from "@/components/HelpTour";
+import ChatBot from "@/components/ChatBot";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
@@ -29,6 +30,7 @@ export default function RootLayout({
           <main>
             {children}
           </main>
+          <ChatBot />
           <HelpTour />
         </ThemeProvider>
       </body>

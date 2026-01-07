@@ -12,7 +12,7 @@ interface Decision {
     id: string
     title: string
     confidence_level: number
-    status: 'pending' | 'reviewed'
+    status: 'pending' | 'in_progress' | 'reviewed' | 'done'
     outcome: 'success' | 'failure' | 'unknown'
     created_at: string
 }
@@ -60,7 +60,13 @@ export default function AnalyticsPage() {
         const success = decisions.filter(d => d.outcome === 'success').length
         const failure = decisions.filter(d => d.outcome === 'failure').length
         const unknown = decisions.filter(d => d.outcome === 'unknown').length
+
+        // Status counts
+        const pending = decisions.filter(d => d.status === 'pending').length
+        const inProgress = decisions.filter(d => d.status === 'in_progress').length
         const reviewed = decisions.filter(d => d.status === 'reviewed').length
+        const done = decisions.filter(d => d.status === 'done').length
+
         const avgConfidence = total > 0
             ? (decisions.reduce((sum, d) => sum + d.confidence_level, 0) / total).toFixed(1)
             : '0'
@@ -95,10 +101,10 @@ export default function AnalyticsPage() {
             success,
             failure,
             unknown,
-            reviewed,
+            statusCounts: { pending, inProgress, reviewed, done },
             avgConfidence,
             successRate: total > 0 ? Math.round((success / total) * 100) : 0,
-            reviewRate: total > 0 ? Math.round((reviewed / total) * 100) : 0,
+            completionRate: total > 0 ? Math.round((done / total) * 100) : 0,
             monthlyData: Object.entries(monthlyData).slice(-6),
             confidenceDist,
             successByConfidence
@@ -146,9 +152,9 @@ export default function AnalyticsPage() {
                     <div className="notion-card p-4">
                         <div className="flex items-center gap-2 text-[var(--text-tertiary)] text-xs font-medium uppercase mb-2">
                             <CheckCircle size={14} />
-                            Review Rate
+                            Completion Rate
                         </div>
-                        <p className="text-3xl font-bold text-[var(--accent-purple)]">{analytics.reviewRate}%</p>
+                        <p className="text-3xl font-bold text-[var(--accent-purple)]">{analytics.completionRate}%</p>
                     </div>
                     <div className="notion-card p-4">
                         <div className="flex items-center gap-2 text-[var(--text-tertiary)] text-xs font-medium uppercase mb-2">
@@ -212,6 +218,55 @@ export default function AnalyticsPage() {
                         </div>
                     </div>
 
+                    {/* Workflow Status */}
+                    <div className="notion-card p-6">
+                        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Workflow Status</h3>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-4 gap-2 h-20 items-end">
+                                <div className="flex flex-col items-center gap-1">
+                                    <div className="w-full bg-[var(--bg-tertiary)] rounded-t-sm relative h-full">
+                                        <div
+                                            className="absolute bottom-0 w-full bg-[var(--text-tertiary)] rounded-t-sm"
+                                            style={{ height: `${analytics.total > 0 ? (analytics.statusCounts.pending / analytics.total) * 100 : 0}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-xs text-[var(--text-secondary)]">To Do</span>
+                                    <span className="text-xs font-bold">{analytics.statusCounts.pending}</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <div className="w-full bg-[var(--bg-tertiary)] rounded-t-sm relative h-full">
+                                        <div
+                                            className="absolute bottom-0 w-full bg-[var(--accent-blue)] rounded-t-sm"
+                                            style={{ height: `${analytics.total > 0 ? (analytics.statusCounts.inProgress / analytics.total) * 100 : 0}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-xs text-[var(--text-secondary)]">In Progress</span>
+                                    <span className="text-xs font-bold">{analytics.statusCounts.inProgress}</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <div className="w-full bg-[var(--bg-tertiary)] rounded-t-sm relative h-full">
+                                        <div
+                                            className="absolute bottom-0 w-full bg-[var(--accent-purple)] rounded-t-sm"
+                                            style={{ height: `${analytics.total > 0 ? (analytics.statusCounts.reviewed / analytics.total) * 100 : 0}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-xs text-[var(--text-secondary)]">Review</span>
+                                    <span className="text-xs font-bold">{analytics.statusCounts.reviewed}</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <div className="w-full bg-[var(--bg-tertiary)] rounded-t-sm relative h-full">
+                                        <div
+                                            className="absolute bottom-0 w-full bg-[var(--accent-green)] rounded-t-sm"
+                                            style={{ height: `${analytics.total > 0 ? (analytics.statusCounts.done / analytics.total) * 100 : 0}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-xs text-[var(--text-secondary)]">Done</span>
+                                    <span className="text-xs font-bold">{analytics.statusCounts.done}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Confidence vs Success */}
                     <div className="notion-card p-6">
                         <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Success Rate by Confidence</h3>
@@ -234,8 +289,8 @@ export default function AnalyticsPage() {
                     </div>
 
                     {/* Monthly Trend */}
-                    <div className="notion-card p-6 lg:col-span-2">
-                        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Monthly Decisions</h3>
+                    <div className="notion-card p-6">
+                        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Monthly Outcomes</h3>
                         {analytics.monthlyData.length > 0 ? (
                             <div className="flex items-end justify-between h-32 gap-4">
                                 {analytics.monthlyData.map(([month, data]) => {

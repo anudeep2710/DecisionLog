@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import decisions, teams, tags, comments, votes
+from routers import decisions, teams, tags, comments, votes, chat, bot, whiteboards
 from routers.auth_routes import router as auth_router
 from database import engine, Base
 import uvicorn
@@ -33,6 +33,9 @@ app.include_router(teams.router)
 app.include_router(tags.router)
 app.include_router(comments.router)
 app.include_router(votes.router)
+app.include_router(chat.router)
+app.include_router(bot.router)
+app.include_router(whiteboards.router)
 
 @app.get("/")
 def root():

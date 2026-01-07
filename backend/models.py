@@ -25,6 +25,7 @@ class User(Base):
     comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
     votes = relationship("Vote", back_populates="user", cascade="all, delete-orphan")
     team_memberships = relationship("TeamMember", back_populates="user", cascade="all, delete-orphan")
+    messages = relationship("Message", back_populates="user", cascade="all, delete-orphan")
 
 
 # Decision model
@@ -122,6 +123,7 @@ class Team(Base):
     # Relationships
     decisions = relationship("Decision", back_populates="team")
     members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")
+    messages = relationship("Message", back_populates="team", cascade="all, delete-orphan")
 
 
 # Team Member model
@@ -137,3 +139,35 @@ class TeamMember(Base):
     # Relationships
     team = relationship("Team", back_populates="members")
     user = relationship("User", back_populates="team_memberships")
+
+
+# Message model (Team Chat)
+class Message(Base):
+    __tablename__ = "messages"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    team_id = Column(String, ForeignKey("teams.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    
+    # Relationships
+    team = relationship("Team", back_populates="messages")
+    user = relationship("User", back_populates="messages")
+
+
+# Whiteboard model
+class Whiteboard(Base):
+    __tablename__ = "whiteboards"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    team_id = Column(String, ForeignKey("teams.id", ondelete="CASCADE"), nullable=True)
+    name = Column(String, nullable=False)
+    data = Column(Text, nullable=False, default="[]") # JSON string of shapes
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    user = relationship("User")
+    team = relationship("Team")

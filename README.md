@@ -9,13 +9,19 @@ A modern, full-stack decision tracking web application built with **Next.js** an
 ## 📸 Screenshots
 
 ### Homepage
-![Homepage](screenshots/homepage.png)
+![Homepage](screenshots/start.png)
 
 ### Dashboard
 ![Dashboard](screenshots/dashboard.png)
 
-### Features Page
-![Features](screenshots/features.png)
+### Team Chat
+![Team Chat](screenshots/teamchat.png)
+
+### Analytics
+![Analytics](screenshots/analytics.png)
+
+### Whiteboard Flow
+![Decision Flow](screenshots/decison-flow.png)
 
 ### Login Page
 ![Login](screenshots/login.png)
@@ -38,6 +44,8 @@ A modern, full-stack decision tracking web application built with **Next.js** an
 - ✅ **Voting** - Team approve/reject/abstain votes
 - 💬 **Comments** - Follow-up notes on decisions
 - 📰 **Activity Feed** - Real-time team activity stream
+- 🤖 **Decision Helper** - AI Chatbot to answer questions about your data
+- 💬 **Team Chat** - Real-time collaboration in Team Spaces
 - 🌙 **Dark Mode** - Theme toggle with system preference respect
 - ❓ **Interactive Help** - Built-in tour for new users
 
@@ -137,6 +145,9 @@ Authorization: Bearer <jwt_token>
 | POST | `/comments/` | Add a comment |
 | GET | `/votes/decision/{id}` | Get vote summary |
 | POST | `/votes/` | Cast a vote |
+| POST | `/bot/query` | Query the AI chatbot |
+| GET | `/chat/{team_id}` | Get recent chat messages |
+| POST | `/chat/` | Send a chat message |
 
 📁 **Postman Collection**: `DecisionLog_API.postman_collection.json`
 
@@ -205,7 +216,9 @@ DecisionLog/
 │       ├── teams.py
 │       ├── tags.py
 │       ├── comments.py
-│       └── votes.py
+│       ├── votes.py
+│       ├── chat.py
+│       └── bot.py
 │   └── test_comprehensive.py   # Test suite
 │
 ├── supabase_schema.sql         # Legacy schema reference
