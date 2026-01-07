@@ -7,9 +7,13 @@ import os
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./decisionlog.db")
 
 # Create engine
+connect_args = {}
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, 
-    connect_args={"check_same_thread": False}  # Needed for SQLite
+    connect_args=connect_args
 )
 
 # Session factory
