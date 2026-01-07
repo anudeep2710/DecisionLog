@@ -2,7 +2,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
-import Navbar from '@/components/Navbar'
 import Link from 'next/link'
 import {
     BarChart2, TrendingUp, TrendingDown, PieChart,
@@ -107,173 +106,167 @@ export default function AnalyticsPage() {
 
     if (loading) {
         return (
-            <>
-                <Navbar />
-                <div className="min-h-[calc(100vh-48px)] flex items-center justify-center">
-                    <div className="animate-pulse text-[var(--text-secondary)]">Loading analytics...</div>
-                </div>
-            </>
+            <div className="min-h-[calc(100vh-48px)] flex items-center justify-center">
+                <div className="animate-pulse text-[var(--text-secondary)]">Loading analytics...</div>
+            </div>
         )
     }
 
     return (
-        <>
-            <Navbar />
-            <div className="min-h-[calc(100vh-48px)]">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-                    {/* Header */}
-                    <div className="flex items-center gap-4 mb-8">
-                        <Link href="/dashboard" className="p-2 rounded-md hover:bg-[var(--bg-hover)] transition-colors">
-                            <ArrowLeft size={20} className="text-[var(--text-secondary)]" />
-                        </Link>
-                        <div>
-                            <h1 className="text-2xl font-bold text-[var(--text-primary)]">Analytics</h1>
-                            <p className="text-[var(--text-secondary)] text-sm mt-1">Insights from your {analytics.total} decisions</p>
+        <div className="min-h-[calc(100vh-48px)]">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+                {/* Header */}
+                <div className="flex items-center gap-4 mb-8">
+                    <Link href="/dashboard" className="p-2 rounded-md hover:bg-[var(--bg-hover)] transition-colors">
+                        <ArrowLeft size={20} className="text-[var(--text-secondary)]" />
+                    </Link>
+                    <div>
+                        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Analytics</h1>
+                        <p className="text-[var(--text-secondary)] text-sm mt-1">Insights from your {analytics.total} decisions</p>
+                    </div>
+                </div>
+
+                {/* Key Metrics */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div className="notion-card p-4">
+                        <div className="flex items-center gap-2 text-[var(--text-tertiary)] text-xs font-medium uppercase mb-2">
+                            <TrendingUp size={14} />
+                            Success Rate
+                        </div>
+                        <p className="text-3xl font-bold text-[var(--accent-green)]">{analytics.successRate}%</p>
+                    </div>
+                    <div className="notion-card p-4">
+                        <div className="flex items-center gap-2 text-[var(--text-tertiary)] text-xs font-medium uppercase mb-2">
+                            <BarChart2 size={14} />
+                            Avg Confidence
+                        </div>
+                        <p className="text-3xl font-bold text-[var(--text-primary)]">{analytics.avgConfidence}/5</p>
+                    </div>
+                    <div className="notion-card p-4">
+                        <div className="flex items-center gap-2 text-[var(--text-tertiary)] text-xs font-medium uppercase mb-2">
+                            <CheckCircle size={14} />
+                            Review Rate
+                        </div>
+                        <p className="text-3xl font-bold text-[var(--accent-purple)]">{analytics.reviewRate}%</p>
+                    </div>
+                    <div className="notion-card p-4">
+                        <div className="flex items-center gap-2 text-[var(--text-tertiary)] text-xs font-medium uppercase mb-2">
+                            <Calendar size={14} />
+                            Total Decisions
+                        </div>
+                        <p className="text-3xl font-bold text-[var(--text-primary)]">{analytics.total}</p>
+                    </div>
+                </div>
+
+                <div className="grid lg:grid-cols-2 gap-6">
+                    {/* Outcome Distribution */}
+                    <div className="notion-card p-6">
+                        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Outcome Distribution</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <div className="flex justify-between text-sm mb-1">
+                                    <span className="flex items-center gap-2 text-[var(--text-secondary)]">
+                                        <CheckCircle size={14} className="text-[var(--accent-green)]" />
+                                        Success
+                                    </span>
+                                    <span className="font-medium text-[var(--text-primary)]">{analytics.success}</span>
+                                </div>
+                                <div className="h-3 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-[var(--accent-green)] rounded-full transition-all"
+                                        style={{ width: `${analytics.total > 0 ? (analytics.success / analytics.total) * 100 : 0}%` }}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex justify-between text-sm mb-1">
+                                    <span className="flex items-center gap-2 text-[var(--text-secondary)]">
+                                        <XCircle size={14} className="text-[var(--accent-red)]" />
+                                        Failure
+                                    </span>
+                                    <span className="font-medium text-[var(--text-primary)]">{analytics.failure}</span>
+                                </div>
+                                <div className="h-3 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-[var(--accent-red)] rounded-full transition-all"
+                                        style={{ width: `${analytics.total > 0 ? (analytics.failure / analytics.total) * 100 : 0}%` }}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex justify-between text-sm mb-1">
+                                    <span className="flex items-center gap-2 text-[var(--text-secondary)]">
+                                        <HelpCircle size={14} className="text-[var(--text-tertiary)]" />
+                                        Unknown
+                                    </span>
+                                    <span className="font-medium text-[var(--text-primary)]">{analytics.unknown}</span>
+                                </div>
+                                <div className="h-3 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-[var(--text-tertiary)] rounded-full transition-all"
+                                        style={{ width: `${analytics.total > 0 ? (analytics.unknown / analytics.total) * 100 : 0}%` }}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Key Metrics */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                        <div className="notion-card p-4">
-                            <div className="flex items-center gap-2 text-[var(--text-tertiary)] text-xs font-medium uppercase mb-2">
-                                <TrendingUp size={14} />
-                                Success Rate
-                            </div>
-                            <p className="text-3xl font-bold text-[var(--accent-green)]">{analytics.successRate}%</p>
+                    {/* Confidence vs Success */}
+                    <div className="notion-card p-6">
+                        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Success Rate by Confidence</h3>
+                        <div className="flex items-end justify-between h-40 gap-2">
+                            {analytics.successByConfidence.map((rate, i) => (
+                                <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                                    <div className="w-full bg-[var(--bg-tertiary)] rounded-t-md relative" style={{ height: '120px' }}>
+                                        <div
+                                            className="absolute bottom-0 w-full bg-gradient-to-t from-[var(--accent-green)] to-[var(--accent-green)]/60 rounded-t-md transition-all"
+                                            style={{ height: `${rate}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-xs font-medium text-[var(--text-secondary)]">{i + 1}</span>
+                                </div>
+                            ))}
                         </div>
-                        <div className="notion-card p-4">
-                            <div className="flex items-center gap-2 text-[var(--text-tertiary)] text-xs font-medium uppercase mb-2">
-                                <BarChart2 size={14} />
-                                Avg Confidence
-                            </div>
-                            <p className="text-3xl font-bold text-[var(--text-primary)]">{analytics.avgConfidence}/5</p>
-                        </div>
-                        <div className="notion-card p-4">
-                            <div className="flex items-center gap-2 text-[var(--text-tertiary)] text-xs font-medium uppercase mb-2">
-                                <CheckCircle size={14} />
-                                Review Rate
-                            </div>
-                            <p className="text-3xl font-bold text-[var(--accent-purple)]">{analytics.reviewRate}%</p>
-                        </div>
-                        <div className="notion-card p-4">
-                            <div className="flex items-center gap-2 text-[var(--text-tertiary)] text-xs font-medium uppercase mb-2">
-                                <Calendar size={14} />
-                                Total Decisions
-                            </div>
-                            <p className="text-3xl font-bold text-[var(--text-primary)]">{analytics.total}</p>
-                        </div>
+                        <p className="text-xs text-[var(--text-tertiary)] mt-4 text-center">
+                            Confidence Level (1-5) → Higher confidence correlates with better outcomes
+                        </p>
                     </div>
 
-                    <div className="grid lg:grid-cols-2 gap-6">
-                        {/* Outcome Distribution */}
-                        <div className="notion-card p-6">
-                            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Outcome Distribution</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="flex items-center gap-2 text-[var(--text-secondary)]">
-                                            <CheckCircle size={14} className="text-[var(--accent-green)]" />
-                                            Success
-                                        </span>
-                                        <span className="font-medium text-[var(--text-primary)]">{analytics.success}</span>
-                                    </div>
-                                    <div className="h-3 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-[var(--accent-green)] rounded-full transition-all"
-                                            style={{ width: `${analytics.total > 0 ? (analytics.success / analytics.total) * 100 : 0}%` }}
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="flex items-center gap-2 text-[var(--text-secondary)]">
-                                            <XCircle size={14} className="text-[var(--accent-red)]" />
-                                            Failure
-                                        </span>
-                                        <span className="font-medium text-[var(--text-primary)]">{analytics.failure}</span>
-                                    </div>
-                                    <div className="h-3 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-[var(--accent-red)] rounded-full transition-all"
-                                            style={{ width: `${analytics.total > 0 ? (analytics.failure / analytics.total) * 100 : 0}%` }}
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="flex items-center gap-2 text-[var(--text-secondary)]">
-                                            <HelpCircle size={14} className="text-[var(--text-tertiary)]" />
-                                            Unknown
-                                        </span>
-                                        <span className="font-medium text-[var(--text-primary)]">{analytics.unknown}</span>
-                                    </div>
-                                    <div className="h-3 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-[var(--text-tertiary)] rounded-full transition-all"
-                                            style={{ width: `${analytics.total > 0 ? (analytics.unknown / analytics.total) * 100 : 0}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Confidence vs Success */}
-                        <div className="notion-card p-6">
-                            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Success Rate by Confidence</h3>
-                            <div className="flex items-end justify-between h-40 gap-2">
-                                {analytics.successByConfidence.map((rate, i) => (
-                                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                                        <div className="w-full bg-[var(--bg-tertiary)] rounded-t-md relative" style={{ height: '120px' }}>
-                                            <div
-                                                className="absolute bottom-0 w-full bg-gradient-to-t from-[var(--accent-green)] to-[var(--accent-green)]/60 rounded-t-md transition-all"
-                                                style={{ height: `${rate}%` }}
-                                            />
-                                        </div>
-                                        <span className="text-xs font-medium text-[var(--text-secondary)]">{i + 1}</span>
-                                    </div>
-                                ))}
-                            </div>
-                            <p className="text-xs text-[var(--text-tertiary)] mt-4 text-center">
-                                Confidence Level (1-5) → Higher confidence correlates with better outcomes
-                            </p>
-                        </div>
-
-                        {/* Monthly Trend */}
-                        <div className="notion-card p-6 lg:col-span-2">
-                            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Monthly Decisions</h3>
-                            {analytics.monthlyData.length > 0 ? (
-                                <div className="flex items-end justify-between h-32 gap-4">
-                                    {analytics.monthlyData.map(([month, data]) => {
-                                        const total = data.success + data.failure + data.unknown
-                                        const maxHeight = 100
-                                        return (
-                                            <div key={month} className="flex-1 flex flex-col items-center gap-2">
-                                                <div className="w-full flex flex-col-reverse gap-0.5" style={{ height: `${maxHeight}px` }}>
-                                                    <div
-                                                        className="w-full bg-[var(--accent-green)] rounded-sm"
-                                                        style={{ height: `${(data.success / Math.max(total, 1)) * maxHeight}px` }}
-                                                    />
-                                                    <div
-                                                        className="w-full bg-[var(--accent-red)] rounded-sm"
-                                                        style={{ height: `${(data.failure / Math.max(total, 1)) * maxHeight}px` }}
-                                                    />
-                                                    <div
-                                                        className="w-full bg-[var(--text-tertiary)] rounded-sm"
-                                                        style={{ height: `${(data.unknown / Math.max(total, 1)) * maxHeight}px` }}
-                                                    />
-                                                </div>
-                                                <span className="text-xs text-[var(--text-tertiary)]">{month}</span>
+                    {/* Monthly Trend */}
+                    <div className="notion-card p-6 lg:col-span-2">
+                        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Monthly Decisions</h3>
+                        {analytics.monthlyData.length > 0 ? (
+                            <div className="flex items-end justify-between h-32 gap-4">
+                                {analytics.monthlyData.map(([month, data]) => {
+                                    const total = data.success + data.failure + data.unknown
+                                    const maxHeight = 100
+                                    return (
+                                        <div key={month} className="flex-1 flex flex-col items-center gap-2">
+                                            <div className="w-full flex flex-col-reverse gap-0.5" style={{ height: `${maxHeight}px` }}>
+                                                <div
+                                                    className="w-full bg-[var(--accent-green)] rounded-sm"
+                                                    style={{ height: `${(data.success / Math.max(total, 1)) * maxHeight}px` }}
+                                                />
+                                                <div
+                                                    className="w-full bg-[var(--accent-red)] rounded-sm"
+                                                    style={{ height: `${(data.failure / Math.max(total, 1)) * maxHeight}px` }}
+                                                />
+                                                <div
+                                                    className="w-full bg-[var(--text-tertiary)] rounded-sm"
+                                                    style={{ height: `${(data.unknown / Math.max(total, 1)) * maxHeight}px` }}
+                                                />
                                             </div>
-                                        )
-                                    })}
-                                </div>
-                            ) : (
-                                <p className="text-center text-[var(--text-tertiary)] py-8">No data yet. Start logging decisions!</p>
-                            )}
-                        </div>
+                                            <span className="text-xs text-[var(--text-tertiary)]">{month}</span>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        ) : (
+                            <p className="text-center text-[var(--text-tertiary)] py-8">No data yet. Start logging decisions!</p>
+                        )}
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     )
 }
