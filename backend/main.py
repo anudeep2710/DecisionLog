@@ -2,14 +2,20 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import decisions, teams, tags, comments, votes
 import uvicorn
+import os
 
 app = FastAPI(title="DecisionLog API")
 
-# CORS middleware
+# CORS middleware - allow all origins in production
 origins = [
-    "http://localhost:3000", # Next.js
+    "http://localhost:3000",
     "http://127.0.0.1:3000",
+    os.getenv("FRONTEND_URL", "*"),  # Vercel frontend URL
 ]
+
+# Allow all origins if FRONTEND_URL is set to "*"
+if "*" in origins:
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
