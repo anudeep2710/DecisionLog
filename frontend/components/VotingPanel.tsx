@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+
 import { ThumbsUp, ThumbsDown, MinusCircle, Users } from 'lucide-react'
 
 interface VoteSummary {
@@ -33,11 +33,12 @@ export default function VotingPanel({ decisionId, isTeamDecision = false }: Prop
 
     const fetchVotes = async () => {
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             const res = await fetch(`${backendUrl}/votes/decision/${decisionId}`, {
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
                 setVotes(await res.json())
@@ -51,21 +52,22 @@ export default function VotingPanel({ decisionId, isTeamDecision = false }: Prop
 
     const castVote = async (voteType: 'approve' | 'reject' | 'abstain') => {
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             // If clicking same vote, remove it
             if (votes?.user_vote === voteType) {
                 await fetch(`${backendUrl}/votes/decision/${decisionId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 })
             } else {
                 await fetch(`${backendUrl}/votes/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.access_token}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
                         decision_id: decisionId,
@@ -156,3 +158,4 @@ export default function VotingPanel({ decisionId, isTeamDecision = false }: Prop
         </div>
     )
 }
+

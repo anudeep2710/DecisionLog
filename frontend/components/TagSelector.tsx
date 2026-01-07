@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+
 import { Tag, X, Plus } from 'lucide-react'
 
 interface TagType {
@@ -28,11 +28,12 @@ export default function TagSelector({ decisionId, selectedTags, onTagsChange }: 
 
     const fetchTags = async () => {
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             const res = await fetch(`${backendUrl}/tags/`, {
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
                 setAllTags(await res.json())
@@ -47,14 +48,15 @@ export default function TagSelector({ decisionId, selectedTags, onTagsChange }: 
         setLoading(true)
 
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             const res = await fetch(`${backendUrl}/tags/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ name: newTagName.trim() })
             })
@@ -185,3 +187,4 @@ export default function TagSelector({ decisionId, selectedTags, onTagsChange }: 
         </div>
     )
 }
+

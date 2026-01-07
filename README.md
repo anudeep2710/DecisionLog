@@ -2,7 +2,7 @@
 
 A modern, full-stack decision tracking web application built with **Next.js** and **FastAPI** to help individuals and teams log, track, and learn from their decisions.
 
-![DecisionLog](https://img.shields.io/badge/Next.js-14-black) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-green) ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-blue) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Styling-cyan)
+![Next.js](https://img.shields.io/badge/Next.js-14-black) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-green) ![SQLite](https://img.shields.io/badge/SQLite-Database-blue) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Styling-cyan)
 
 ---
 
@@ -25,7 +25,7 @@ A modern, full-stack decision tracking web application built with **Next.js** an
 ## 🚀 Features
 
 ### Core Features
-- ✅ **User Authentication** - Secure JWT-based login/registration with password reset
+- ✅ **User Authentication** - Secure local JWT-based login/registration
 - ✅ **Decision CRUD** - Create, read, update, delete decisions with full context
 - ✅ **Dashboard** - View all decisions with search, filter, and sort capabilities
 - ✅ **Protected Routes** - Authentication required for dashboard access
@@ -50,8 +50,9 @@ A modern, full-stack decision tracking web application built with **Next.js** an
 | Frontend | Next.js 14, React, TypeScript |
 | Styling | TailwindCSS, Custom CSS Variables |
 | Backend | FastAPI (Python) |
-| Database | PostgreSQL (Supabase) |
-| Auth | Supabase Auth (JWT) |
+| Database | SQLite (Local file-based database) |
+| Auth | Custom JWT Authentication (FastAPI + OAuth2PasswordBearer) |
+| ORM | SQLAlchemy |
 | Hosting | Vercel (Frontend), Any Python host (Backend) |
 
 ---
@@ -61,7 +62,6 @@ A modern, full-stack decision tracking web application built with **Next.js** an
 ### Prerequisites
 - Node.js 18+
 - Python 3.9+
-- Supabase account
 
 ### 1. Clone the repository
 ```bash
@@ -69,19 +69,7 @@ git clone https://github.com/anudeep2710/DecisionLog.git
 cd DecisionLog
 ```
 
-### 2. Set up the Frontend
-```bash
-cd frontend
-npm install
-```
-
-Create `frontend/.env.local`:
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-```
-
-### 3. Set up the Backend
+### 2. Set up the Backend
 ```bash
 cd backend
 python -m venv venv
@@ -90,23 +78,28 @@ venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-Create `backend/.env`:
-```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_service_role_key
+No complex environment variables needed for local development! The app uses a local SQLite database by default.
+
+### 3. Run the Backend
+```bash
+venv\Scripts\python main.py
+```
+The backend API will start at `http://localhost:8000`. It will automatically create the `decisionlog.db` SQLite file.
+
+### 4. Set up the Frontend
+Open a new terminal:
+```bash
+cd frontend
+npm install
 ```
 
-### 4. Set up Supabase Database
-Run the SQL in `supabase_schema.sql` in your Supabase SQL Editor.
+Create `frontend/.env.local` (optional, defaults to localhost:8000):
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-### 5. Run the Application
+### 5. Run the Frontend
 ```bash
-# Terminal 1 - Backend
-cd backend
-venv\Scripts\python main.py
-
-# Terminal 2 - Frontend
-cd frontend
 npm run dev
 ```
 
@@ -151,10 +144,10 @@ Authorization: Bearer <jwt_token>
 
 ## 🔐 Security Features
 
-- **Password Hashing**: Handled by Supabase (bcrypt)
-- **JWT Authentication**: Token-based auth with Supabase
+- **Password Hashing**: SHA256 Crypt (Passlib)
+- **JWT Authentication**: Stateless, signed tokens with HS256
 - **Protected Routes**: Middleware checks auth on frontend
-- **Row Level Security**: Database-level access control
+- **Row Level Security**: Application-level authorization in FastAPI
 - **Input Validation**: Pydantic models on backend
 - **CORS Configuration**: Restricted to allowed origins
 
@@ -165,61 +158,21 @@ Authorization: Bearer <jwt_token>
 ### Current Architecture
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Next.js   │────▶│   FastAPI   │────▶│  Supabase   │
-│  (Vercel)   │     │  (Backend)  │     │ (PostgreSQL)│
+│   Next.js   │────▶│   FastAPI   │────▶│   SQLite    │
+│  (Frontend) │     │  (Backend)  │     │ (Local DB)  │
 └─────────────┘     └─────────────┘     └─────────────┘
 ```
 
 ### Production Scaling Recommendations
 
-#### 1. **Horizontal Scaling**
-```
-                    ┌─────────────┐
-                    │   Load      │
-                    │  Balancer   │
-                    └──────┬──────┘
-           ┌───────────────┼───────────────┐
-           ▼               ▼               ▼
-    ┌───────────┐   ┌───────────┐   ┌───────────┐
-    │  FastAPI  │   │  FastAPI  │   │  FastAPI  │
-    │ Instance 1│   │ Instance 2│   │ Instance 3│
-    └───────────┘   └───────────┘   └───────────┘
-           │               │               │
-           └───────────────┼───────────────┘
-                           ▼
-                    ┌─────────────┐
-                    │  Supabase   │
-                    │  (Pooler)   │
-                    └─────────────┘
-```
+#### 1. **Switch to PostgreSQL**
+For production deployment, switch the `DATABASE_URL` environment variable in the backend to point to a PostgreSQL instance (e.g., Supabase, RDS, Railway). SQLAlchemy handles the dialect switch automatically.
 
-#### 2. **Caching Layer**
-- Add **Redis** for session/token caching
-- Cache frequent queries (user profile, tags)
-- Implement response caching for analytics
+#### 2. **Horizontal Scaling**
+Deploy the FastAPI backend on a scalable platform like Railway or Render.
 
-#### 3. **Database Optimization**
-- Use **Supabase Connection Pooler** (PgBouncer)
-- Add indexes on frequently queried columns
-- Implement pagination for large lists
-
-#### 4. **CDN & Static Assets**
-- Serve frontend via **Vercel Edge Network**
-- Use **Supabase Storage** for file uploads
-- Optimize images with Next.js Image component
-
-#### 5. **Microservices (Future)**
-```
-┌──────────────────────────────────────────────────┐
-│                  API Gateway                      │
-└──────────────────────────────────────────────────┘
-       │           │           │           │
-       ▼           ▼           ▼           ▼
-┌───────────┐┌───────────┐┌───────────┐┌───────────┐
-│  Auth     ││ Decisions ││   Teams   ││ Analytics │
-│  Service  ││  Service  ││  Service  ││  Service  │
-└───────────┘└───────────┘└───────────┘└───────────┘
-```
+#### 3. **Caching Layer**
+Add Redis for session/token caching or response caching if needed.
 
 ---
 
@@ -240,19 +193,22 @@ DecisionLog/
 │   │   ├── TagSelector.tsx
 │   │   ├── VotingPanel.tsx
 │   │   └── HelpTour.tsx
-│   └── lib/                    # Supabase client
+│   └── lib/                    # Utilities
 │
 ├── backend/
 │   ├── main.py                 # FastAPI entry point
 │   ├── auth.py                 # JWT authentication
+│   ├── database.py             # DB connection (SQLAlchemy)
+│   ├── models.py               # SQLAlchemy models
 │   └── routers/                # API routes
 │       ├── decisions.py
 │       ├── teams.py
 │       ├── tags.py
 │       ├── comments.py
 │       └── votes.py
+│   └── test_comprehensive.py   # Test suite
 │
-├── supabase_schema.sql         # Database schema
+├── supabase_schema.sql         # Legacy schema reference
 └── DecisionLog_API.postman_collection.json
 ```
 

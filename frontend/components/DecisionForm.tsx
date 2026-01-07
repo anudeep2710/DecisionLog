@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
+
 import TemplateSelector, { DecisionTemplate } from '@/components/TemplateSelector'
 import { ArrowLeft, Check } from 'lucide-react'
 
@@ -46,8 +46,8 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
         setLoading(true)
 
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) {
+            const token = localStorage.getItem('token')
+            if (!token) {
                 alert("Please log in")
                 return
             }
@@ -57,7 +57,7 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
                 method: isEditing ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(formData)
             })

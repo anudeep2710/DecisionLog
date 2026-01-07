@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+
 import { MessageSquare, Send, Edit2, Trash2, X, Check } from 'lucide-react'
 
 interface Comment {
@@ -30,11 +30,12 @@ export default function Comments({ decisionId }: Props) {
 
     const fetchComments = async () => {
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             const res = await fetch(`${backendUrl}/comments/decision/${decisionId}`, {
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
                 setComments(await res.json())
@@ -52,14 +53,15 @@ export default function Comments({ decisionId }: Props) {
         setSubmitting(true)
 
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             const res = await fetch(`${backendUrl}/comments/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     decision_id: decisionId,
@@ -82,14 +84,15 @@ export default function Comments({ decisionId }: Props) {
         if (!editContent.trim()) return
 
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             const res = await fetch(`${backendUrl}/comments/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ content: editContent.trim() })
             })
@@ -108,12 +111,13 @@ export default function Comments({ decisionId }: Props) {
         if (!confirm("Delete this comment?")) return
 
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             const res = await fetch(`${backendUrl}/comments/${id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
                 setComments(comments.filter(c => c.id !== id))
@@ -227,3 +231,4 @@ export default function Comments({ decisionId }: Props) {
         </div>
     )
 }
+

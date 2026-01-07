@@ -1,9 +1,10 @@
 "use client"
 import { useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Lock, AlertCircle } from 'lucide-react'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -17,17 +18,26 @@ export default function Login() {
         setLoading(true)
         setError(null)
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        })
+        try {
+            const res = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            })
 
-        if (error) {
-            setError(error.message)
-            setLoading(false)
-        } else {
+            if (!res.ok) {
+                const data = await res.json()
+                throw new Error(data.detail || 'Login failed')
+            }
+
+            const data = await res.json()
+            localStorage.setItem('token', data.access_token)
+            localStorage.setItem('user', JSON.stringify(data.user))
             router.push('/dashboard')
             router.refresh()
+        } catch (err: any) {
+            setError(err.message)
+            setLoading(false)
         }
     }
 

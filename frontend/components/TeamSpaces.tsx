@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+
 import { Users, Plus, Copy, Check, LogOut, Settings, ChevronRight } from 'lucide-react'
 
 interface Team {
@@ -36,11 +36,12 @@ export default function TeamSpaces({ onTeamSelect, selectedTeamId }: Props) {
 
     const fetchTeams = async () => {
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             const res = await fetch(`${backendUrl}/teams/`, {
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
                 setTeams(await res.json())
@@ -56,14 +57,15 @@ export default function TeamSpaces({ onTeamSelect, selectedTeamId }: Props) {
         if (!newTeamName.trim()) return
         setError('')
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             const res = await fetch(`${backendUrl}/teams/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ name: newTeamName, description: newTeamDesc })
             })
@@ -86,14 +88,15 @@ export default function TeamSpaces({ onTeamSelect, selectedTeamId }: Props) {
         if (!inviteCode.trim()) return
         setError('')
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             const res = await fetch(`${backendUrl}/teams/join`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ invite_code: inviteCode })
             })
@@ -120,12 +123,14 @@ export default function TeamSpaces({ onTeamSelect, selectedTeamId }: Props) {
     const leaveTeam = async (teamId: string) => {
         if (!confirm("Leave this team?")) return
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+            const savedUser = localStorage.getItem('user')
+            if (!token || !savedUser) return
 
-            const res = await fetch(`${backendUrl}/teams/${teamId}/members/${session.user.id}`, {
+            const user = JSON.parse(savedUser)
+            const res = await fetch(`${backendUrl}/teams/${teamId}/members/${user.id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
                 setTeams(teams.filter(t => t.id !== teamId))
@@ -158,8 +163,8 @@ export default function TeamSpaces({ onTeamSelect, selectedTeamId }: Props) {
             <button
                 onClick={() => onTeamSelect(null)}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm mb-2 transition-colors ${selectedTeamId === null
-                        ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
-                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                     }`}
             >
                 <span>Personal</span>
@@ -179,8 +184,8 @@ export default function TeamSpaces({ onTeamSelect, selectedTeamId }: Props) {
                         <div
                             key={team.id}
                             className={`group flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${selectedTeamId === team.id
-                                    ? 'bg-[var(--accent-purple)]/15 text-[var(--accent-purple)]'
-                                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                                ? 'bg-[var(--accent-purple)]/15 text-[var(--accent-purple)]'
+                                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                                 }`}
                             onClick={() => onTeamSelect(team.id)}
                         >
@@ -282,3 +287,4 @@ export default function TeamSpaces({ onTeamSelect, selectedTeamId }: Props) {
         </div>
     )
 }
+

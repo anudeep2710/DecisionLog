@@ -1,9 +1,10 @@
 "use client"
 import { useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Lock, User, AlertCircle, ArrowRight } from 'lucide-react'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export default function Register() {
     const [email, setEmail] = useState('')
@@ -18,21 +19,25 @@ export default function Register() {
         setLoading(true)
         setError(null)
 
-        const { error: signUpError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    full_name: fullName,
-                },
-            },
-        })
+        try {
+            const res = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, full_name: fullName })
+            })
 
-        if (signUpError) {
-            setError(signUpError.message)
+            if (!res.ok) {
+                const data = await res.json()
+                throw new Error(data.detail || 'Registration failed')
+            }
+
+            const data = await res.json()
+            localStorage.setItem('token', data.access_token)
+            localStorage.setItem('user', JSON.stringify(data.user))
+            router.push('/dashboard')
+        } catch (err: any) {
+            setError(err.message)
             setLoading(false)
-        } else {
-            router.push('/login')
         }
     }
 

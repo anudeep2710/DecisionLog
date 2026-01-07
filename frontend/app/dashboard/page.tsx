@@ -1,6 +1,5 @@
 "use client"
 import { useEffect, useState, useMemo } from 'react'
-import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import DecisionCard from '@/components/DecisionCard'
 import TeamSpaces from '@/components/TeamSpaces'
@@ -45,14 +44,16 @@ export default function Dashboard() {
     const backendUrl = "http://localhost:8000"
 
     useEffect(() => {
-        const checkUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) {
+        const checkUser = () => {
+            const token = localStorage.getItem('token')
+            const savedUser = localStorage.getItem('user')
+
+            if (!token || !savedUser) {
                 router.push('/login')
                 return
             }
-            setUser(session.user)
-            fetchDecisions(session.access_token)
+            setUser(JSON.parse(savedUser))
+            fetchDecisions(token)
         }
         checkUser()
 
@@ -94,23 +95,23 @@ export default function Dashboard() {
     }
 
     // Refetch when team changes
-    const handleTeamSelect = async (teamId: string | null) => {
+    const handleTeamSelect = (teamId: string | null) => {
         setSelectedTeamId(teamId)
         setLoading(true)
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session) {
-            fetchDecisions(session.access_token, teamId)
+        const token = localStorage.getItem('token')
+        if (token) {
+            fetchDecisions(token, teamId)
         }
     }
 
     const handleDelete = async (id: string) => {
         if (!confirm("Delete this decision?")) return
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+            if (!token) return
             const res = await fetch(`${backendUrl}/decisions/${id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
                 setDecisions(decisions.filter(d => d.id !== id))

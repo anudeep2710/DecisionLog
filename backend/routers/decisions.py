@@ -1,100 +1,136 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from typing import Optional, List
-from auth import get_current_user, supabase
+from datetime import datetime
+from database import get_db
+from models import Decision, User
+from auth import get_current_user
 
 router = APIRouter(
     prefix="/decisions",
     tags=["decisions"]
 )
 
-# Pydantic Models
-class DecisionBase(BaseModel):
+# Pydantic models
+class DecisionCreate(BaseModel):
     title: str
     context: Optional[str] = None
     choice_made: Optional[str] = None
-    confidence_level: Optional[int] = Field(None, ge=1, le=5)
-    status: Optional[str] = "pending" # pending, reviewed
-    outcome: Optional[str] = "unknown" # success, failure, unknown
+    confidence_level: int = 3
+    status: str = "pending"
+    outcome: str = "unknown"
     notes: Optional[str] = None
-    team_id: Optional[str] = None  # null for personal, uuid for team
+    team_id: Optional[str] = None
 
-class DecisionCreate(DecisionBase):
-    pass
+class DecisionUpdate(BaseModel):
+    title: Optional[str] = None
+    context: Optional[str] = None
+    choice_made: Optional[str] = None
+    confidence_level: Optional[int] = None
+    status: Optional[str] = None
+    outcome: Optional[str] = None
+    notes: Optional[str] = None
 
-class DecisionUpdate(DecisionBase):
-    pass
-
-class DecisionResponse(DecisionBase):
+class DecisionResponse(BaseModel):
     id: str
     user_id: str
-    team_id: Optional[str] = None
-    created_at: str
-    updated_at: str
-
+    team_id: Optional[str]
+    title: str
+    context: Optional[str]
+    choice_made: Optional[str]
+    confidence_level: int
+    status: str
+    outcome: str
+    notes: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    
     class Config:
         from_attributes = True
 
-# Routes
+
 @router.get("/", response_model=List[DecisionResponse])
-def get_decisions(team_id: Optional[str] = None, user = Depends(get_current_user)):
-    """Get decisions - personal or filtered by team"""
-    try:
-        if team_id:
-            # Get team decisions (must be a member)
-            membership = supabase.table("team_members").select("role").eq("team_id", team_id).eq("user_id", user.id).execute()
-            if not membership.data:
-                raise HTTPException(status_code=403, detail="Not a member of this team")
-            response = supabase.table("decisions").select("*").eq("team_id", team_id).order("created_at", desc=True).execute()
-        else:
-            # Get all user's decisions (both personal and team - backwards compatible)
-            response = supabase.table("decisions").select("*").eq("user_id", user.id).order("created_at", desc=True).execute()
-        return response.data
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def get_decisions(
+    team_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all decisions for user or team"""
+    query = db.query(Decision)
+    
+    if team_id:
+        query = query.filter(Decision.team_id == team_id)
+    else:
+        query = query.filter(Decision.user_id == current_user.id)
+    
+    return query.order_by(Decision.created_at.desc()).all()
+
 
 @router.post("/", response_model=DecisionResponse)
-def create_decision(decision: DecisionCreate, user = Depends(get_current_user)):
-    try:
-        data = decision.model_dump(exclude_unset=True)
-        data["user_id"] = user.id
-        
-        response = supabase.table("decisions").insert(data).execute()
-        
-        if not response.data:
-             raise HTTPException(status_code=400, detail="Failed to create decision")
-             
-        return response.data[0]
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=str(e))
+def create_decision(
+    decision: DecisionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new decision"""
+    db_decision = Decision(
+        user_id=current_user.id,
+        team_id=decision.team_id,
+        title=decision.title,
+        context=decision.context,
+        choice_made=decision.choice_made,
+        confidence_level=decision.confidence_level,
+        status=decision.status,
+        outcome=decision.outcome,
+        notes=decision.notes
+    )
+    db.add(db_decision)
+    db.commit()
+    db.refresh(db_decision)
+    return db_decision
+
 
 @router.put("/{decision_id}", response_model=DecisionResponse)
-def update_decision(decision_id: str, decision: DecisionUpdate, user = Depends(get_current_user)):
-    try:
-        data = decision.model_dump(exclude_unset=True)
-        # Ensure 'updated_at' is updated? Supabase might handle it via trigger or we send it.
-        # Let's let the DB handle it if configured, or send it here. 
-        # For now, just sending data.
-        
-        response = supabase.table("decisions").update(data).eq("id", decision_id).eq("user_id", user.id).execute()
-        
-        if not response.data:
-            raise HTTPException(status_code=404, detail="Decision not found or not authorized")
-            
-        return response.data[0]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def update_decision(
+    decision_id: str,
+    decision: DecisionUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Update a decision"""
+    db_decision = db.query(Decision).filter(
+        Decision.id == decision_id,
+        Decision.user_id == current_user.id
+    ).first()
+    
+    if not db_decision:
+        raise HTTPException(status_code=404, detail="Decision not found")
+    
+    update_data = decision.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_decision, key, value)
+    
+    db.commit()
+    db.refresh(db_decision)
+    return db_decision
+
 
 @router.delete("/{decision_id}")
-def delete_decision(decision_id: str, user = Depends(get_current_user)):
-    try:
-        response = supabase.table("decisions").delete().eq("id", decision_id).eq("user_id", user.id).execute()
-        # Checking if data returned tells us if something was deleted (Supabase returns deleted rows)
-        if not response.data:
-             raise HTTPException(status_code=404, detail="Decision not found or not authorized")
-        return {"detail": "Decision deleted successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def delete_decision(
+    decision_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a decision"""
+    db_decision = db.query(Decision).filter(
+        Decision.id == decision_id,
+        Decision.user_id == current_user.id
+    ).first()
+    
+    if not db_decision:
+        raise HTTPException(status_code=404, detail="Decision not found")
+    
+    db.delete(db_decision)
+    db.commit()
+    return {"detail": "Decision deleted successfully"}

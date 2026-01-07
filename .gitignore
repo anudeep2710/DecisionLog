@@ -34,3 +34,8 @@ Thumbs.db
 
 # Supabase
 .supabase/
+
+# Database
+*.db
+*.sqlite
+decisionlog.db

@@ -1,336 +1,157 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List
-from auth import get_current_user, supabase
+from datetime import datetime
+from database import get_db
+from models import Team, TeamMember, User
+from auth import get_current_user
+import random
+import string
 
 router = APIRouter(
     prefix="/teams",
     tags=["teams"]
 )
 
-# Pydantic Models
+def generate_invite_code():
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+
+# Pydantic models
 class TeamCreate(BaseModel):
     name: str
-    description: Optional[str] = None
-
-class TeamUpdate(BaseModel):
-    name: Optional[str] = None
     description: Optional[str] = None
 
 class TeamResponse(BaseModel):
     id: str
     name: str
     description: Optional[str]
-    created_by: str
     invite_code: str
-    created_at: str
-    member_count: Optional[int] = None
+    created_at: datetime
     role: Optional[str] = None
-
-class TeamMemberResponse(BaseModel):
-    user_id: str
-    role: str
-    joined_at: str
-    full_name: Optional[str] = None
-    email: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
 
 class JoinTeamRequest(BaseModel):
     invite_code: str
 
-# Routes
 
 @router.get("/", response_model=List[TeamResponse])
-def get_my_teams(user = Depends(get_current_user)):
-    """Get all teams the current user is a member of"""
-    try:
-        # Get team memberships
-        memberships = supabase.table("team_members")\
-            .select("team_id, role")\
-            .eq("user_id", user.id)\
-            .execute()
-        
-        if not memberships.data:
-            return []
-        
-        # Get team details
-        team_ids = [m["team_id"] for m in memberships.data]
-        teams = supabase.table("teams")\
-            .select("*")\
-            .in_("id", team_ids)\
-            .execute()
-        
-        # Merge role info
-        role_map = {m["team_id"]: m["role"] for m in memberships.data}
-        result = []
-        for team in teams.data:
-            team["role"] = role_map.get(team["id"])
-            result.append(team)
-        
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def get_teams(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all teams for user"""
+    memberships = db.query(TeamMember).filter(
+        TeamMember.user_id == current_user.id
+    ).all()
+    
+    teams = []
+    for membership in memberships:
+        team = db.query(Team).filter(Team.id == membership.team_id).first()
+        if team:
+            teams.append({
+                "id": team.id,
+                "name": team.name,
+                "description": team.description,
+                "invite_code": team.invite_code,
+                "created_at": team.created_at,
+                "role": membership.role
+            })
+    return teams
 
 
 @router.post("/", response_model=TeamResponse)
-def create_team(team: TeamCreate, user = Depends(get_current_user)):
-    """Create a new team (creator becomes owner)"""
-    try:
-        data = team.model_dump()
-        data["created_by"] = user.id
-        
-        response = supabase.table("teams").insert(data).execute()
-        
-        if not response.data:
-            raise HTTPException(status_code=400, detail="Failed to create team")
-        
-        new_team = response.data[0]
-        new_team["role"] = "owner"
-        return new_team
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/{team_id}", response_model=TeamResponse)
-def get_team(team_id: str, user = Depends(get_current_user)):
-    """Get team details (must be a member)"""
-    try:
-        # Check membership
-        membership = supabase.table("team_members")\
-            .select("role")\
-            .eq("team_id", team_id)\
-            .eq("user_id", user.id)\
-            .single()\
-            .execute()
-        
-        if not membership.data:
-            raise HTTPException(status_code=403, detail="Not a member of this team")
-        
-        # Get team
-        team = supabase.table("teams")\
-            .select("*")\
-            .eq("id", team_id)\
-            .single()\
-            .execute()
-        
-        if not team.data:
-            raise HTTPException(status_code=404, detail="Team not found")
-        
-        team.data["role"] = membership.data["role"]
-        
-        # Get member count
-        members = supabase.table("team_members")\
-            .select("user_id", count="exact")\
-            .eq("team_id", team_id)\
-            .execute()
-        team.data["member_count"] = members.count
-        
-        return team.data
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.put("/{team_id}", response_model=TeamResponse)
-def update_team(team_id: str, team: TeamUpdate, user = Depends(get_current_user)):
-    """Update team (owner/admin only)"""
-    try:
-        # Check admin role
-        membership = supabase.table("team_members")\
-            .select("role")\
-            .eq("team_id", team_id)\
-            .eq("user_id", user.id)\
-            .single()\
-            .execute()
-        
-        if not membership.data or membership.data["role"] not in ["owner", "admin"]:
-            raise HTTPException(status_code=403, detail="Only admins can update team")
-        
-        data = team.model_dump(exclude_unset=True)
-        response = supabase.table("teams")\
-            .update(data)\
-            .eq("id", team_id)\
-            .execute()
-        
-        if not response.data:
-            raise HTTPException(status_code=404, detail="Team not found")
-        
-        return response.data[0]
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.delete("/{team_id}")
-def delete_team(team_id: str, user = Depends(get_current_user)):
-    """Delete team (owner only)"""
-    try:
-        team = supabase.table("teams")\
-            .select("created_by")\
-            .eq("id", team_id)\
-            .single()\
-            .execute()
-        
-        if not team.data:
-            raise HTTPException(status_code=404, detail="Team not found")
-        
-        if team.data["created_by"] != user.id:
-            raise HTTPException(status_code=403, detail="Only owner can delete team")
-        
-        supabase.table("teams").delete().eq("id", team_id).execute()
-        return {"detail": "Team deleted successfully"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def create_team(
+    team: TeamCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new team"""
+    db_team = Team(
+        name=team.name,
+        description=team.description,
+        invite_code=generate_invite_code()
+    )
+    db.add(db_team)
+    db.commit()
+    db.refresh(db_team)
+    
+    # Add creator as owner
+    membership = TeamMember(
+        team_id=db_team.id,
+        user_id=current_user.id,
+        role="owner"
+    )
+    db.add(membership)
+    db.commit()
+    
+    return {
+        "id": db_team.id,
+        "name": db_team.name,
+        "description": db_team.description,
+        "invite_code": db_team.invite_code,
+        "created_at": db_team.created_at,
+        "role": "owner"
+    }
 
 
 @router.post("/join", response_model=TeamResponse)
-def join_team(request: JoinTeamRequest, user = Depends(get_current_user)):
-    """Join a team using invite code"""
-    try:
-        # Find team by invite code
-        team = supabase.table("teams")\
-            .select("*")\
-            .eq("invite_code", request.invite_code)\
-            .single()\
-            .execute()
-        
-        if not team.data:
-            raise HTTPException(status_code=404, detail="Invalid invite code")
-        
-        # Check if already a member
-        existing = supabase.table("team_members")\
-            .select("user_id")\
-            .eq("team_id", team.data["id"])\
-            .eq("user_id", user.id)\
-            .execute()
-        
-        if existing.data:
-            raise HTTPException(status_code=400, detail="Already a member of this team")
-        
-        # Add as member
-        supabase.table("team_members").insert({
-            "team_id": team.data["id"],
-            "user_id": user.id,
-            "role": "member"
-        }).execute()
-        
-        team.data["role"] = "member"
-        return team.data
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def join_team(
+    request: JoinTeamRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Join a team by invite code"""
+    team = db.query(Team).filter(Team.invite_code == request.invite_code).first()
+    
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    
+    # Check if already member
+    existing = db.query(TeamMember).filter(
+        TeamMember.team_id == team.id,
+        TeamMember.user_id == current_user.id
+    ).first()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Already a member")
+    
+    membership = TeamMember(
+        team_id=team.id,
+        user_id=current_user.id,
+        role="member"
+    )
+    db.add(membership)
+    db.commit()
+    
+    return {
+        "id": team.id,
+        "name": team.name,
+        "description": team.description,
+        "invite_code": team.invite_code,
+        "created_at": team.created_at,
+        "role": "member"
+    }
 
 
-@router.get("/{team_id}/members", response_model=List[TeamMemberResponse])
-def get_team_members(team_id: str, user = Depends(get_current_user)):
-    """Get all members of a team"""
-    try:
-        # Check membership
-        membership = supabase.table("team_members")\
-            .select("role")\
-            .eq("team_id", team_id)\
-            .eq("user_id", user.id)\
-            .execute()
-        
-        if not membership.data:
-            raise HTTPException(status_code=403, detail="Not a member of this team")
-        
-        # Get all members with profile info
-        members = supabase.table("team_members")\
-            .select("user_id, role, joined_at")\
-            .eq("team_id", team_id)\
-            .execute()
-        
-        # Get profile info for each member
-        result = []
-        for m in members.data:
-            profile = supabase.table("profiles")\
-                .select("full_name")\
-                .eq("id", m["user_id"])\
-                .single()\
-                .execute()
-            
-            m["full_name"] = profile.data.get("full_name") if profile.data else None
-            result.append(m)
-        
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.delete("/{team_id}/members/{member_id}")
-def remove_team_member(team_id: str, member_id: str, user = Depends(get_current_user)):
-    """Remove a member from team (admin/owner or self)"""
-    try:
-        # Check if removing self or is admin
-        membership = supabase.table("team_members")\
-            .select("role")\
-            .eq("team_id", team_id)\
-            .eq("user_id", user.id)\
-            .single()\
-            .execute()
-        
-        if not membership.data:
-            raise HTTPException(status_code=403, detail="Not a member of this team")
-        
-        is_admin = membership.data["role"] in ["owner", "admin"]
-        is_self = member_id == user.id
-        
-        if not is_admin and not is_self:
-            raise HTTPException(status_code=403, detail="Cannot remove other members")
-        
-        # Prevent owner from being removed
-        target = supabase.table("team_members")\
-            .select("role")\
-            .eq("team_id", team_id)\
-            .eq("user_id", member_id)\
-            .single()\
-            .execute()
-        
-        if target.data and target.data["role"] == "owner" and not is_self:
-            raise HTTPException(status_code=403, detail="Cannot remove team owner")
-        
-        supabase.table("team_members")\
-            .delete()\
-            .eq("team_id", team_id)\
-            .eq("user_id", member_id)\
-            .execute()
-        
-        return {"detail": "Member removed successfully"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/{team_id}/decisions")
-def get_team_decisions(team_id: str, user = Depends(get_current_user)):
-    """Get all decisions shared with a team"""
-    try:
-        # Check membership
-        membership = supabase.table("team_members")\
-            .select("role")\
-            .eq("team_id", team_id)\
-            .eq("user_id", user.id)\
-            .execute()
-        
-        if not membership.data:
-            raise HTTPException(status_code=403, detail="Not a member of this team")
-        
-        decisions = supabase.table("decisions")\
-            .select("*")\
-            .eq("team_id", team_id)\
-            .order("created_at", desc=True)\
-            .execute()
-        
-        return decisions.data
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@router.delete("/{team_id}")
+def delete_team(
+    team_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a team (owner only)"""
+    membership = db.query(TeamMember).filter(
+        TeamMember.team_id == team_id,
+        TeamMember.user_id == current_user.id,
+        TeamMember.role == "owner"
+    ).first()
+    
+    if not membership:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    db.query(Team).filter(Team.id == team_id).delete()
+    db.commit()
+    return {"detail": "Team deleted successfully"}

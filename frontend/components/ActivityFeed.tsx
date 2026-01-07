@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+
 import { Activity, MessageSquare, ThumbsUp, UserPlus, FileText, Clock } from 'lucide-react'
 
 interface ActivityItem {
@@ -28,12 +28,13 @@ export default function ActivityFeed({ teamId }: Props) {
 
     const fetchActivity = async () => {
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
+            const token = localStorage.getItem('token')
+if (!token) return
+            if (!token) return
 
             // Fetch team decisions and related activity
             const decisionsRes = await fetch(`${backendUrl}/teams/${teamId}/decisions`, {
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
+                headers: { 'Authorization': `Bearer ${token}` }
             })
 
             if (decisionsRes.ok) {
@@ -145,3 +146,4 @@ export default function ActivityFeed({ teamId }: Props) {
         </div>
     )
 }
+

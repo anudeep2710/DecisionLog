@@ -1,7 +1,6 @@
 "use client"
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
 import { useRouter, usePathname } from 'next/navigation'
 import { LogOut, Menu, X, Sun, Moon, LayoutDashboard } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
@@ -16,21 +15,25 @@ export default function Navbar() {
 
     useEffect(() => {
         setMounted(true)
-        const getUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            setUser(session?.user)
+        // Check localStorage for user
+        const savedUser = localStorage.getItem('user')
+        if (savedUser) {
+            setUser(JSON.parse(savedUser))
         }
-        getUser()
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user)
-        })
-
-        return () => subscription.unsubscribe()
+        // Listen for storage changes (login/logout from other tabs)
+        const handleStorage = () => {
+            const savedUser = localStorage.getItem('user')
+            setUser(savedUser ? JSON.parse(savedUser) : null)
+        }
+        window.addEventListener('storage', handleStorage)
+        return () => window.removeEventListener('storage', handleStorage)
     }, [])
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut()
+    const handleLogout = () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        setUser(null)
         router.push('/login')
     }
 

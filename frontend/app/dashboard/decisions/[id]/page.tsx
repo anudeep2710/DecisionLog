@@ -1,8 +1,9 @@
 "use client"
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
 import DecisionForm from '@/components/DecisionForm'
 import { useParams, useRouter } from 'next/navigation'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export default function EditDecisionPage() {
     const { id } = useParams()
@@ -12,24 +13,32 @@ export default function EditDecisionPage() {
 
     useEffect(() => {
         const fetchDecision = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) {
+            const token = localStorage.getItem('token')
+            if (!token) {
                 router.push('/login')
                 return
             }
 
-            const { data, error } = await supabase
-                .from('decisions')
-                .select('*')
-                .eq('id', id)
-                .single()
+            try {
+                // Fetch all decisions and find the one with matching ID
+                const res = await fetch(`${API_URL}/decisions/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
 
-            if (error) {
+                if (res.ok) {
+                    const decisions = await res.json()
+                    const found = decisions.find((d: any) => d.id === id)
+                    if (found) {
+                        setDecision(found)
+                    } else {
+                        alert("Decision not found")
+                        router.push('/dashboard')
+                    }
+                }
+            } catch (error) {
                 console.error("Error fetching decision", error)
-                alert("Decision not found")
+                alert("Failed to load decision")
                 router.push('/dashboard')
-            } else {
-                setDecision(data)
             }
             setLoading(false)
         }
@@ -65,8 +74,9 @@ export default function EditDecisionPage() {
     )
 
     return (
-        <div className="min-h-[calc(100vh-48px)] py-8 px-4 sm:px-6">
-            {decision && <DecisionForm initialData={decision} isEditing={true} />}
+        <div className="max-w-3xl mx-auto px-4 py-8">
+            <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-6">Edit Decision</h1>
+            {decision && <DecisionForm decision={decision} />}
         </div>
     )
 }

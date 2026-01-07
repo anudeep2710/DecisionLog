@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useMemo } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -26,14 +26,15 @@ export default function AnalyticsPage() {
     const backendUrl = "http://localhost:8000"
 
     useEffect(() => {
-        const checkUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) {
+        const checkUser = () => {
+            const token = localStorage.getItem('token')
+            const savedUser = localStorage.getItem('user')
+            if (!token || !savedUser) {
                 router.push('/login')
                 return
             }
-            setUser(session.user)
-            fetchDecisions(session.access_token)
+            setUser(JSON.parse(savedUser))
+            fetchDecisions(token)
         }
         checkUser()
     }, [router])
