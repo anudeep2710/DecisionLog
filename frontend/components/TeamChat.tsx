@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 import { Send, User as UserIcon } from 'lucide-react'
 
 interface Message {
@@ -21,7 +22,7 @@ export default function TeamChat({ teamId, currentUserId }: Props) {
     const [messages, setMessages] = useState<Message[]>([])
     const [newMessage, setNewMessage] = useState('')
     const [loading, setLoading] = useState(true)
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
     const scrollRef = useRef<HTMLDivElement>(null)
     const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
 
@@ -165,8 +166,8 @@ export default function TeamChat({ teamId, currentUserId }: Props) {
                                         </p>
                                     )}
                                     <div className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${isMe
-                                            ? 'bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-tr-none'
-                                            : 'bg-[var(--bg-primary)] border border-[var(--border-default)] text-[var(--text-primary)] rounded-tl-none'
+                                        ? 'bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-tr-none'
+                                        : 'bg-[var(--bg-primary)] border border-[var(--border-default)] text-[var(--text-primary)] rounded-tl-none'
                                         }`}>
                                         <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                                     </div>

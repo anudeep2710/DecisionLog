@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useState, useMemo } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 import { useRouter } from 'next/navigation'
 import DecisionCard from '@/components/DecisionCard'
 import TeamSpaces from '@/components/TeamSpaces'
@@ -47,7 +48,7 @@ export default function Dashboard() {
     const [showExport, setShowExport] = useState(false)
     const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
 
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
 
     useEffect(() => {
         const checkUser = () => {

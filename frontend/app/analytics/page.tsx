@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useMemo } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -23,7 +24,7 @@ export default function AnalyticsPage() {
     const [user, setUser] = useState<any>(null)
     const router = useRouter()
 
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
 
     useEffect(() => {
         const checkUser = () => {

@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 
 import { Users, Plus, Copy, Check, LogOut, Settings, ChevronRight } from 'lucide-react'
 
@@ -28,7 +29,7 @@ export default function TeamSpaces({ onTeamSelect, selectedTeamId }: Props) {
     const [copiedId, setCopiedId] = useState<string | null>(null)
     const [error, setError] = useState('')
 
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
 
     useEffect(() => {
         fetchTeams()
@@ -37,7 +38,7 @@ export default function TeamSpaces({ onTeamSelect, selectedTeamId }: Props) {
     const fetchTeams = async () => {
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             const res = await fetch(`${backendUrl}/teams/`, {
@@ -58,7 +59,7 @@ if (!token) return
         setError('')
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             const res = await fetch(`${backendUrl}/teams/`, {
@@ -89,7 +90,7 @@ if (!token) return
         setError('')
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             const res = await fetch(`${backendUrl}/teams/join`, {

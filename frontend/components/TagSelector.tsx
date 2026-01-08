@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 
 import { Tag, X, Plus } from 'lucide-react'
 
@@ -20,7 +21,7 @@ export default function TagSelector({ decisionId, selectedTags, onTagsChange }: 
     const [showInput, setShowInput] = useState(false)
     const [loading, setLoading] = useState(false)
 
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
 
     useEffect(() => {
         fetchTags()
@@ -29,7 +30,7 @@ export default function TagSelector({ decisionId, selectedTags, onTagsChange }: 
     const fetchTags = async () => {
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             const res = await fetch(`${backendUrl}/tags/`, {
@@ -49,7 +50,7 @@ if (!token) return
 
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             const res = await fetch(`${backendUrl}/tags/`, {

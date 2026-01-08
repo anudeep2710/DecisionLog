@@ -1,6 +1,7 @@
 "use client"
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 import { Plus, LayoutTemplate, Trash2, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -16,7 +17,7 @@ export default function WhiteboardsPage() {
     const [loading, setLoading] = useState(true)
     const router = useRouter()
 
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
 
     useEffect(() => {
         const token = localStorage.getItem('token')

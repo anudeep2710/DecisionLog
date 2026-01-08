@@ -1,6 +1,7 @@
 "use client"
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { API_BASE_URL } from '@/lib/api'
 
 import TemplateSelector, { DecisionTemplate } from '@/components/TemplateSelector'
 import { ArrowLeft, Check } from 'lucide-react'
@@ -39,7 +40,7 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
         team_id: teamId || undefined
     })
 
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target

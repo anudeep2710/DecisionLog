@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 
 import { ThumbsUp, ThumbsDown, MinusCircle, Users } from 'lucide-react'
 
@@ -21,7 +22,7 @@ export default function VotingPanel({ decisionId, isTeamDecision = false }: Prop
     const [loading, setLoading] = useState(true)
     const [showVoters, setShowVoters] = useState(false)
 
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
 
     useEffect(() => {
         if (isTeamDecision) {
@@ -34,7 +35,7 @@ export default function VotingPanel({ decisionId, isTeamDecision = false }: Prop
     const fetchVotes = async () => {
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             const res = await fetch(`${backendUrl}/votes/decision/${decisionId}`, {
@@ -53,7 +54,7 @@ if (!token) return
     const castVote = async (voteType: 'approve' | 'reject' | 'abstain') => {
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             // If clicking same vote, remove it
@@ -108,8 +109,8 @@ if (!token) return
                 <button
                     onClick={() => castVote('approve')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${votes?.user_vote === 'approve'
-                            ? 'bg-[var(--accent-green)] text-white'
-                            : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--accent-green)]/20 hover:text-[var(--accent-green)]'
+                        ? 'bg-[var(--accent-green)] text-white'
+                        : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--accent-green)]/20 hover:text-[var(--accent-green)]'
                         }`}
                 >
                     <ThumbsUp size={14} />
@@ -118,8 +119,8 @@ if (!token) return
                 <button
                     onClick={() => castVote('reject')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${votes?.user_vote === 'reject'
-                            ? 'bg-[var(--accent-red)] text-white'
-                            : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--accent-red)]/20 hover:text-[var(--accent-red)]'
+                        ? 'bg-[var(--accent-red)] text-white'
+                        : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--accent-red)]/20 hover:text-[var(--accent-red)]'
                         }`}
                 >
                     <ThumbsDown size={14} />
@@ -128,8 +129,8 @@ if (!token) return
                 <button
                     onClick={() => castVote('abstain')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${votes?.user_vote === 'abstain'
-                            ? 'bg-[var(--text-tertiary)] text-white'
-                            : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--text-tertiary)]/20'
+                        ? 'bg-[var(--text-tertiary)] text-white'
+                        : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--text-tertiary)]/20'
                         }`}
                 >
                     <MinusCircle size={14} />
@@ -145,8 +146,8 @@ if (!token) return
                             <div key={i} className="flex items-center justify-between text-xs">
                                 <span className="text-[var(--text-secondary)]">{voter.name}</span>
                                 <span className={`font-medium ${voter.vote === 'approve' ? 'text-[var(--accent-green)]' :
-                                        voter.vote === 'reject' ? 'text-[var(--accent-red)]' :
-                                            'text-[var(--text-tertiary)]'
+                                    voter.vote === 'reject' ? 'text-[var(--accent-red)]' :
+                                        'text-[var(--text-tertiary)]'
                                     }`}>
                                     {voter.vote}
                                 </span>

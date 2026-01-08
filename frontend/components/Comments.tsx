@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 
 import { MessageSquare, Send, Edit2, Trash2, X, Check } from 'lucide-react'
 
@@ -22,7 +23,7 @@ export default function Comments({ decisionId }: Props) {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editContent, setEditContent] = useState('')
 
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
 
     useEffect(() => {
         fetchComments()
@@ -31,7 +32,7 @@ export default function Comments({ decisionId }: Props) {
     const fetchComments = async () => {
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             const res = await fetch(`${backendUrl}/comments/decision/${decisionId}`, {
@@ -54,7 +55,7 @@ if (!token) return
 
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             const res = await fetch(`${backendUrl}/comments/`, {
@@ -85,7 +86,7 @@ if (!token) return
 
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             const res = await fetch(`${backendUrl}/comments/${id}`, {
@@ -112,7 +113,7 @@ if (!token) return
 
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             const res = await fetch(`${backendUrl}/comments/${id}`, {

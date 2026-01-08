@@ -1,5 +1,6 @@
 "use client"
 import { useState, useRef, useEffect } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 import { MessageCircle, X, Send, Bot, ExternalLink, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
@@ -17,7 +18,7 @@ export default function ChatBot() {
     ])
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(false)
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
     const scrollToBottom = () => {
@@ -114,8 +115,8 @@ export default function ChatBot() {
                         {messages.map((msg) => (
                             <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
                                 <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${msg.role === 'user'
-                                        ? 'bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-tr-none'
-                                        : 'bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-tl-none text-[var(--text-primary)]'
+                                    ? 'bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-tr-none'
+                                    : 'bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-tl-none text-[var(--text-primary)]'
                                     }`}>
                                     <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
 

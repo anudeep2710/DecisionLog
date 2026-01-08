@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 import Whiteboard, { Shape } from '@/components/Whiteboard'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Save } from 'lucide-react'
@@ -12,7 +13,7 @@ export default function WhiteboardEditorPage() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
 
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
 
     useEffect(() => {
         const token = localStorage.getItem('token')

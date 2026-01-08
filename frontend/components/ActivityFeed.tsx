@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '@/lib/api'
 
 import { Activity, MessageSquare, ThumbsUp, UserPlus, FileText, Clock } from 'lucide-react'
 
@@ -20,7 +21,7 @@ export default function ActivityFeed({ teamId }: Props) {
     const [activities, setActivities] = useState<ActivityItem[]>([])
     const [loading, setLoading] = useState(true)
 
-    const backendUrl = "http://localhost:8000"
+    const backendUrl = API_BASE_URL
 
     useEffect(() => {
         fetchActivity()
@@ -29,7 +30,7 @@ export default function ActivityFeed({ teamId }: Props) {
     const fetchActivity = async () => {
         try {
             const token = localStorage.getItem('token')
-if (!token) return
+            if (!token) return
             if (!token) return
 
             // Fetch team decisions and related activity
