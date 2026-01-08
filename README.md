@@ -171,4 +171,23 @@ DecisionLog/
 
 ---
 
+## Production & Scaling Strategy
+
+### Frontend Scaling
+- **Edge Deployment**: Leverage Vercel's Global Edge Network to serve static assets (JS, CSS, Images) from the node closest to the user, minimizing latency.
+- **Static Site Generation (SSG)**: Pre-render marketing and public pages to reduce server load and improve Time-to-First-Byte (TTFB).
+- **Asset Optimization**: Use Next.js `<Image>` component for automatic resizing and WebP conversion to reduce bandwidth usage.
+
+### Backend Scaling
+- **Horizontal Scaling**: Deploy the FastAPI application across multiple containers/nodes behind a Load Balancer (e.g., NGINX or AWS ALB) to interpret concurrent requests.
+- **Asynchronous Processing**: Offload heavy computational tasks (like AI queries or complex analytics) to a task queue (Celery + Redis) to keep the main API responsive.
+- **Connection Pooling**: Implement PgBouncer to manage database connections efficiently, preventing connection exhaustion under high load.
+
+### Database Evolution
+- **Migration to PostgreSQL**: Move from SQLite to a managed PostgreSQL instance (e.g., AWS RDS, Supabase, or Railway) to support concurrent writes and complex queries.
+- **Read Replicas**: Separate Read/Write operations. Direct analytical queries to Read Replicas to ensure the primary database remains performant for transactional user actions.
+- **Caching Layer**: Implement Redis for caching frequently accessed data (e.g., user profiles, common decision templates) to reduce database hits.
+
+---
+
 **Author**: Anudeep Batchu
