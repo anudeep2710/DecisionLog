@@ -1,2 +1,10 @@
-# Keep the Vercel entry point aligned with the Docker/Railway backend.
--r ../backend/requirements.txt
+# Vercel's Python builder requires dependencies to be listed in this file.
+fastapi
+uvicorn
+pydantic[email]
+python-dotenv
+python-multipart
+sqlalchemy
+passlib[bcrypt]
+python-jose[cryptography]
+psycopg2-binary
