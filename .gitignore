@@ -39,3 +39,5 @@ Thumbs.db
 *.db
 *.sqlite
 decisionlog.db
+.vercel
+.env*
