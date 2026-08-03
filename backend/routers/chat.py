@@ -27,7 +27,7 @@ class MessageResponse(BaseModel):
     user: dict  # specific user fields
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 @router.get("/{team_id}", response_model=List[MessageResponse])
 def get_messages(team_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

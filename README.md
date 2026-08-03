@@ -2,7 +2,7 @@
 
 DecisionLog is a comprehensive decision tracking and collaboration platform designed to help teams and individuals document, analyze, and reflect on their decision-making processes. It combines structured data logging with visual whiteboarding and real-time collaboration tools.
 
-![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js) ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=flat-square&logo=fastapi&logoColor=white) ![SQLite](https://img.shields.io/badge/SQLite-Data_Persistence-003B57?style=flat-square&logo=sqlite&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Styling-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js) ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=flat-square&logo=fastapi&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?style=flat-square&logo=postgresql&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Styling-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 
 ---
 
@@ -62,7 +62,7 @@ DecisionLog is a comprehensive decision tracking and collaboration platform desi
 | **Frontend** | Next.js 14, React, TypeScript |
 | **Styling** | TailwindCSS, CSS Modules |
 | **Backend** | FastAPI (Python 3.9+) |
-| **Database** | SQLite (SQLAlchemy ORM) |
+| **Database** | PostgreSQL on Neon (SQLAlchemy ORM) |
 | **Security** | OAuth2 with JWT, BCrypt Hashing |
 | **Architecture** | RESTful API, Client-Side Rendering |
 
@@ -97,11 +97,16 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+For local development without a configured database, the backend still falls
+back to `sqlite:///./decisionlog.db`. Production deployments should set
+`DATABASE_URL` to the connection string from Neon.
+
 ### 3. Start Backend Server
 ```bash
 venv\Scripts\python main.py
 ```
-The server will initialize at `http://localhost:8000`. The SQLite database is automatically generated on the first run.
+The server will initialize at `http://localhost:8000`. The database tables are
+created automatically on the first run.
 
 ### 4. Frontend Configuration
 Open a new terminal session and navigate to the frontend directory:
@@ -115,6 +120,31 @@ npm install
 npm run dev
 ```
 The application will be accessible at `http://localhost:3000`.
+
+### Production deployment
+
+The root `Dockerfile` runs the FastAPI service and works with Railway or any
+Docker-compatible host. Configure these backend environment variables in the
+hosting service:
+
+```text
+DATABASE_URL=<Neon connection string>
+JWT_SECRET=<long random secret>
+CORS_ORIGINS=<deployed frontend URL>
+```
+
+After deployment, verify `https://<backend-host>/health` returns a healthy
+status. The Neon schema is initialized automatically by the application.
+
+If a local SQLite database contains data to preserve, run the one-time copy
+before deploying:
+
+```bash
+cd backend
+SOURCE_DATABASE_URL=sqlite:///./decisionlog.db \
+DATABASE_URL='<Neon connection string>' \
+python migrate_sqlite_to_postgres.py
+```
 
 ---
 
@@ -184,7 +214,7 @@ DecisionLog/
 - **Connection Pooling**: Implement PgBouncer to manage database connections efficiently, preventing connection exhaustion under high load.
 
 ### Database Evolution
-- **Migration to PostgreSQL**: Move from SQLite to a managed PostgreSQL instance (e.g., AWS RDS, Supabase, or Railway) to support concurrent writes and complex queries.
+- **PostgreSQL on Neon**: The production backend uses a managed Neon PostgreSQL database to support concurrent writes and complex queries.
 - **Read Replicas**: Separate Read/Write operations. Direct analytical queries to Read Replicas to ensure the primary database remains performant for transactional user actions.
 - **Caching Layer**: Implement Redis for caching frequently accessed data (e.g., user profiles, common decision templates) to reduce database hits.
 

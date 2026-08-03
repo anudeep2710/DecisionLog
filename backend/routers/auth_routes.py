@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from database import get_db
 from models import User
-from auth import get_password_hash, verify_password, create_access_token
+from auth import get_current_user, get_password_hash, verify_password, create_access_token
 
 router = APIRouter(
     prefix="/auth",
@@ -87,8 +87,6 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserResponse)
-def get_me(db: Session = Depends(get_db), current_user: User = Depends(lambda: None)):
+def get_me(current_user: User = Depends(get_current_user)):
     """Get current user profile"""
-    from auth import get_current_user
-    # This will be handled by the dependency
-    pass
+    return current_user

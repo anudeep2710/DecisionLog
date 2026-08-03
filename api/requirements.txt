@@ -1,5 +1,2 @@
-fastapi
-supabase
-pydantic
-python-dotenv
-python-multipart
+# Keep the Vercel entry point aligned with the Docker/Railway backend.
+-r ../backend/requirements.txt

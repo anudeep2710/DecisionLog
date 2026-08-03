@@ -1,5 +1,5 @@
-# Use official Python runtime
-FROM python:3.9-slim
+# Use an official Python runtime
+FROM python:3.11-slim
 
 # Set working directory in the container
 WORKDIR /app
@@ -19,8 +19,8 @@ WORKDIR /app/backend
 # Make port 8000 available
 EXPOSE 8000
 
-# Define environment variable (Railway overrides PORT, but good default)
+# Define environment variable (Railway/other hosts may override PORT)
 ENV PORT=8000
 
 # Run uvicorn server
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
