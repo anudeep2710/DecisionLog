@@ -483,7 +483,15 @@ export default function Dashboard() {
                 {/* Decisions View - LIST or BOARD */}
                 {viewMode === 'board' ? (
                     <div className="animate-in fade-in duration-300">
-                        <KanbanBoard decisions={filteredDecisions} onStatusChange={handleStatusUpdate} />
+                        <KanbanBoard
+                            decisions={filteredDecisions}
+                            onStatusChange={handleStatusUpdate}
+                            onCreateDecision={(status) => {
+                                const params = new URLSearchParams({ status })
+                                if (selectedTeamId) params.set('teamId', selectedTeamId)
+                                router.push(`/dashboard/new?${params.toString()}`)
+                            }}
+                        />
                     </div>
                 ) : (
                     filteredDecisions.length === 0 ? (

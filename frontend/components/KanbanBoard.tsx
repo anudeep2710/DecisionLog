@@ -18,6 +18,7 @@ interface Decision {
 interface Props {
     decisions: Decision[]
     onStatusChange: (id: string, newStatus: string) => void
+    onCreateDecision?: (status: string) => void
 }
 
 const COLUMNS = [
@@ -27,7 +28,7 @@ const COLUMNS = [
     { id: 'done', title: 'Done', color: 'var(--accent-green)' }
 ]
 
-export default function KanbanBoard({ decisions, onStatusChange }: Props) {
+export default function KanbanBoard({ decisions, onStatusChange, onCreateDecision }: Props) {
     const router = useRouter()
     const [draggedId, setDraggedId] = useState<string | null>(null)
     const [localDecisions, setLocalDecisions] = useState<Decision[]>(decisions)
@@ -86,7 +87,20 @@ export default function KanbanBoard({ decisions, onStatusChange }: Props) {
                                 {getDecisionsByStatus(column.id).length}
                             </span>
                         </div>
-                        <button className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">
+                        <button
+                            type="button"
+                            onClick={(event) => {
+                                event.stopPropagation()
+                                if (onCreateDecision) {
+                                    onCreateDecision(column.id)
+                                } else {
+                                    router.push(`/dashboard/new?status=${encodeURIComponent(column.id)}`)
+                                }
+                            }}
+                            className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                            aria-label={`Add decision to ${column.title}`}
+                            title={`Add decision to ${column.title}`}
+                        >
                             <Plus size={16} />
                         </button>
                     </div>

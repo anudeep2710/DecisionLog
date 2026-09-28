@@ -27,6 +27,10 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
     const router = useRouter()
     const searchParams = useSearchParams()
     const teamId = searchParams.get('teamId')
+    const requestedStatus = searchParams.get('status')
+    const initialStatus = requestedStatus && ['pending', 'in_progress', 'reviewed', 'done'].includes(requestedStatus)
+        ? requestedStatus
+        : 'pending'
 
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState<Decision>(initialData || {
@@ -34,7 +38,7 @@ export default function DecisionForm({ initialData, isEditing = false }: Props) 
         context: '',
         choice_made: '',
         confidence_level: 3,
-        status: 'pending',
+        status: initialStatus,
         outcome: 'unknown',
         notes: '',
         team_id: teamId || undefined
