@@ -269,7 +269,7 @@ export default function Dashboard() {
                     <div>
                         <h1 className="text-2xl font-bold text-[var(--text-primary)]">Dashboard</h1>
                         <p className="text-[var(--text-secondary)] text-sm mt-1">
-                            Welcome back, {user?.full_name || user?.user_metadata?.full_name || 'there'}
+                            Welcome back, {user?.full_name || user?.user_metadata?.full_name || user?.email || 'there'}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
