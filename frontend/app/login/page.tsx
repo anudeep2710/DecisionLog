@@ -3,9 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Lock, AlertCircle } from 'lucide-react'
-
-import { API_BASE_URL } from '@/lib/api'
-const API_URL = API_BASE_URL
+import { useAuth } from '@/lib/auth'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -13,6 +11,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
+    const { login } = useAuth()
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -20,20 +19,7 @@ export default function Login() {
         setError(null)
 
         try {
-            const res = await fetch(`${API_URL}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            })
-
-            if (!res.ok) {
-                const data = await res.json()
-                throw new Error(data.detail || 'Login failed')
-            }
-
-            const data = await res.json()
-            localStorage.setItem('token', data.access_token)
-            localStorage.setItem('user', JSON.stringify(data.user))
+            await login(email, password)
             router.push('/dashboard')
             router.refresh()
         } catch (err: any) {

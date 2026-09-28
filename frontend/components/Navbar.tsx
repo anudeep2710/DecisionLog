@@ -4,36 +4,23 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { LogOut, Menu, X, Sun, Moon, LayoutDashboard } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
+import { useAuth } from '@/lib/auth'
 
 export default function Navbar() {
-    const [user, setUser] = useState<any>(null)
     const [isOpen, setIsOpen] = useState(false)
     const [mounted, setMounted] = useState(false)
     const router = useRouter()
     const pathname = usePathname()
     const { theme, toggleTheme } = useTheme()
+    const { user, loading: authLoading, logout } = useAuth()
 
     useEffect(() => {
         setMounted(true)
-        // Check localStorage for user
-        const savedUser = localStorage.getItem('user')
-        if (savedUser) {
-            setUser(JSON.parse(savedUser))
-        }
-
-        // Listen for storage changes (login/logout from other tabs)
-        const handleStorage = () => {
-            const savedUser = localStorage.getItem('user')
-            setUser(savedUser ? JSON.parse(savedUser) : null)
-        }
-        window.addEventListener('storage', handleStorage)
-        return () => window.removeEventListener('storage', handleStorage)
     }, [])
 
     const handleLogout = () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        setUser(null)
+        logout()
+        setIsOpen(false)
         router.push('/login')
     }
 
@@ -92,7 +79,7 @@ export default function Navbar() {
 
                         {/* Desktop Nav */}
                         <div className="hidden md:flex items-center gap-2">
-                            {user ? (
+                            {authLoading ? null : user ? (
                                 <>
                                     <div className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--text-secondary)]">
                                         <div className="w-6 h-6 rounded-full bg-[var(--accent-blue)] flex items-center justify-center">
@@ -101,7 +88,7 @@ export default function Navbar() {
                                             </span>
                                         </div>
                                         <span className="max-w-[120px] truncate hidden lg:block">
-                                            {user.user_metadata?.full_name || user.email}
+                                            {user.full_name || user.email}
                                         </span>
                                     </div>
                                     <button
@@ -141,7 +128,7 @@ export default function Navbar() {
             {isOpen && (
                 <div className="md:hidden bg-[var(--bg-primary)] border-t border-[var(--border-default)]">
                     <div className="px-4 py-3 space-y-1">
-                        {user ? (
+                        {authLoading ? null : user ? (
                             <>
                                 <div className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--text-secondary)]">
                                     <div className="w-6 h-6 rounded-full bg-[var(--accent-blue)] flex items-center justify-center">
@@ -150,7 +137,7 @@ export default function Navbar() {
                                         </span>
                                     </div>
                                     <span className="truncate">
-                                        {user.user_metadata?.full_name || user.email}
+                                        {user.full_name || user.email}
                                     </span>
                                 </div>
                                 <Link

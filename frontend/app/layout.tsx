@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import HelpTour from "@/components/HelpTour";
 import ChatBot from "@/components/ChatBot";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuthProvider } from "@/lib/auth";
 import "./globals.css";
 
 const inter = Inter({
@@ -26,12 +27,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         <ThemeProvider>
-          <Navbar />
-          <main>
-            {children}
-          </main>
-          <ChatBot />
-          <HelpTour />
+          <AuthProvider>
+            <Navbar />
+            <main>
+              {children}
+            </main>
+            <ChatBot />
+            <HelpTour />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

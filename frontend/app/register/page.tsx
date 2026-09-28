@@ -3,9 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Lock, User, AlertCircle, ArrowRight } from 'lucide-react'
-
-import { API_BASE_URL } from '@/lib/api'
-const API_URL = API_BASE_URL
+import { useAuth } from '@/lib/auth'
 
 export default function Register() {
     const [email, setEmail] = useState('')
@@ -14,6 +12,7 @@ export default function Register() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
+    const { register } = useAuth()
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -21,20 +20,7 @@ export default function Register() {
         setError(null)
 
         try {
-            const res = await fetch(`${API_URL}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, full_name: fullName })
-            })
-
-            if (!res.ok) {
-                const data = await res.json()
-                throw new Error(data.detail || 'Registration failed')
-            }
-
-            const data = await res.json()
-            localStorage.setItem('token', data.access_token)
-            localStorage.setItem('user', JSON.stringify(data.user))
+            await register(email, password, fullName)
             router.push('/dashboard')
         } catch (err: any) {
             setError(err.message)

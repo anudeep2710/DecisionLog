@@ -1,3 +1,5 @@
+"use client"
+
 // Auth context for local JWT authentication
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
@@ -36,6 +38,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(JSON.parse(savedUser))
         }
         setLoading(false)
+
+        // Keep auth state in sync when another tab logs in or out.
+        const handleStorage = () => {
+            const nextToken = localStorage.getItem('token')
+            const nextUser = localStorage.getItem('user')
+            setToken(nextToken)
+            setUser(nextUser ? JSON.parse(nextUser) : null)
+        }
+
+        window.addEventListener('storage', handleStorage)
+        return () => window.removeEventListener('storage', handleStorage)
     }, [])
 
     const login = async (email: string, password: string) => {
